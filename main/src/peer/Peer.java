@@ -1,10 +1,21 @@
 package peer;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Peer {
     private String ID;
     private String hostName;
     private int port;
     private boolean hasFileOrNot;
+
+    private int rate;
+    private boolean choke;
+    public Set<Integer> pieces;
+
+    public Peer() {
+        pieces = new HashSet<>();
+    }
 
     public String getID() {
         return ID;
@@ -37,4 +48,29 @@ public class Peer {
     public void setHasFileOrNot(boolean hasFileOrNot) {
         this.hasFileOrNot = hasFileOrNot;
     }
+
+    public int getRate() {
+        return rate;
+    }
+
+    public void setRate(int rate) {
+        this.rate = rate;
+    }
+
+    public void increaseRate() {
+        rate++;
+    }
+
+    public void resetRate() {
+        rate = 0;
+    }
+
+    public boolean isChoke() {
+        return choke;
+    }
+
+    public void setChoke(boolean choke) {
+        this.choke = choke;
+    }
+
 }

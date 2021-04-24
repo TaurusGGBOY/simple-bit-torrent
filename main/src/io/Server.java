@@ -1,36 +1,56 @@
 package io;
 
+import javafx.beans.binding.MapExpression;
 import message.ActualMessage;
 import message.ShakeHandMessage;
 import peer.LocalPeer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.util.Map;
 
-public class IoThread extends Thread {
-    private String host;
-    private int port;
+public class Server extends Thread {
+    private static Server server = new Server();
+    private Map<Socket, String> invertedSocketMap;
+
+    private Server() {
+    }
+
+    public static Server getInstance() {
+        return server;
+    }
+
     private SocketChannel socketChannel = null;
     private ByteBuffer buffer;
     private Selector selector = null;
 
-    public IoThread(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public void register(String id, String hostName, int port) {
+        if (invertedSocketMap.containsValue(id)) {
+            return;
+        }
+        Socket socket = null;
+        try {
+            socket = new Socket(hostName, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        invertedSocketMap.put(socket, id);
     }
 
     @Override
     public void run() {
+        // TODO
         buffer = ByteBuffer.allocate(1024);
         try {
             socketChannel = SocketChannel.open();
-            socketChannel.connect(new InetSocketAddress(host, port));
-            while(true){
+            // TODO
+            while (true) {
                 if (socketChannel.read(buffer) == -1) {
                     socketChannel.close();
                 } else {
@@ -52,19 +72,4 @@ public class IoThread extends Thread {
         }
     }
 
-    public void sendMessage(byte[] message) throws IOException {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(message);
-        // TODO 是否需要切换？flip 或者 rewind
-        socketChannel.write(byteBuffer);
-    }
-
-    public void shakeHands(String id) throws IOException {
-        ShakeHandMessage message = new ShakeHandMessage();
-        message.setPeerID(id);
-        sendMessage(message.toBytes());
-    }
-
-    public void sendMessage(ActualMessage message) throws IOException {
-        sendMessage(message.toBytes());
-    }
 }

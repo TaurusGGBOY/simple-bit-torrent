@@ -1,6 +1,6 @@
 package message;
 
-public class ShakeHandMessage {
+public class ShakeHandMessage extends Message {
     private final String header = "P2PFILESHARINGPROJ";
     private final String zeroBits = "0000000000";
     private String peerID;

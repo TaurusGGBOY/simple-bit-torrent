@@ -2,39 +2,40 @@ package peer;
 
 import cfg.CommonCfg;
 import cfg.PeerInfoCfg;
-import io.IoThread;
+import io.Client;
+import io.Server;
+import message.ActualMessage;
+import message.ShakeHandMessage;
 import selection.NeighborSelector;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class LocalPeer {
     // TODO 属性的顺序
     public static LinkedHashMap<String, Peer> peers;
     public static String id;
+    public static Set<Integer> pieces;
     // TODO 顺序之间是否需要空行
 
     // TODO 单例的顺序
-
-    private static void listen() {
-
-    }
 
     public static void main(String[] args) {
         // 读取配置文件
         try {
             CommonCfg.read();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-        try {
             PeerInfoCfg.read();
         } catch (IOException e) {
             e.printStackTrace();
             return;
+        }
+
+        // 如果有完整文件就将所有分片加入到自己的集合
+        pieces = new HashSet<>();
+        if (peers.get(id).isHasFileOrNot()) {
+            for (int i = 0; i < CommonCfg.maxPieceNum; i++) {
+                pieces.add(i);
+            }
         }
 
         // 获取当前的ID
@@ -51,25 +52,29 @@ public class LocalPeer {
             peers.put(peer.getKey(), peer.getValue());
         }
 
+        // 启动本地监听服务器
+        Server server = Server.getInstance();
+        server.start();
+        Client client = Client.getInstance();
+        client.start();
+
         // 与这些人建立连接
-        // TODO 可以只使用一个socket吗
         for (Map.Entry<String, Peer> entry : peers.entrySet()) {
             Peer peer = entry.getValue();
-
-            // TODO 是否需要合成一个？
-            IoThread ioThread = new IoThread(peer.getHostName(), peer.getPort());
-            ioThread.start();
-            ioThread.shakeHands(id);
-            // TODO 发送BitField
+            // 接收服务器注册
+            server.register(entry.getKey(), peer.getHostName(), peer.getPort());
+            // 发送客户端注册
+            client.register(entry.getKey(), peer.getHostName(), peer.getPort());
+            // 发送握手信息
+            client.shakeHands(entry.getKey(), peer.getHostName(), peer.getPort());
+            // 发送BitField信息
+            ActualMessage actualMessage = new ActualMessage(ActualMessage.BITFIELD, entry.getKey());
+            actualMessage.sendBitFieldMessage();
         }
 
         // 开启选举线程
-        NeighborSelector neighborSelector = new NeighborSelector();
+        NeighborSelector neighborSelector = new NeighborSelector(CommonCfg.unchokingInterval, CommonCfg.optimisticUnchokingInterval, CommonCfg.numberOfPreferredNeighbors);
         neighborSelector.start();
-
-        // 监听后续连接线程
-        listen();
-
     }
 
 

@@ -1,23 +1,29 @@
 package message;
 
+import io.Client;
+import io.Server;
+
+import java.io.IOException;
 import java.util.Arrays;
 
-public class ActualMessage {
+public class ActualMessage extends Message {
     private int len;
     private int type;
     private byte[] payload;
+    private String peerID;
 
-    public final int CHOKE = 0;
-    public final int UNCHOKE = 1;
-    public final int INTERESTED = 2;
-    public final int NOTINTERESTED = 3;
-    public final int HAVE = 4;
-    public final int BITFIELD = 5;
-    public final int REQUEST = 6;
-    public final int PIECE = 7;
+    public static final int CHOKE = 0;
+    public static final int UNCHOKE = 1;
+    public static final int INTERESTED = 2;
+    public static final int NOTINTERESTED = 3;
+    public static final int HAVE = 4;
+    public static final int BITFIELD = 5;
+    public static final int REQUEST = 6;
+    public static final int PIECE = 7;
 
-    // TODO
-    public ActualMessage() {
+    public ActualMessage(int type, String peerID) {
+        this.type = type;
+        this.peerID = peerID;
     }
 
     public ActualMessage(byte[] bytes) {
@@ -45,6 +51,12 @@ public class ActualMessage {
         return toString().getBytes();
     }
 
+    public void cacularAndSetLen() {
+        len = 4 + 1 + payload.length;
+    }
+
+
+
     public int getLen() {
         return len;
     }
@@ -67,5 +79,13 @@ public class ActualMessage {
 
     public void setPayload(byte[] payload) {
         this.payload = payload;
+    }
+
+    public String getPeerID() {
+        return peerID;
+    }
+
+    public void setPeerID(String peerID) {
+        this.peerID = peerID;
     }
 }
