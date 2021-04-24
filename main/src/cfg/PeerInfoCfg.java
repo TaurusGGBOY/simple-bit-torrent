@@ -3,24 +3,32 @@ package cfg;
 import peer.Peer;
 
 import java.io.*;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class PeerInfoCfg {
 
     // TODO 这个路径是否正确还未知
     private final static String filePath = "/PeerInfo.cfg";
 
-    public static Map<Integer, Peer> peers;
+    public static LinkedHashMap<String, Peer> peers;
 
     public static void read() throws IOException {
-        File file = new File(filePath);
-        BufferedReader fileReader = new BufferedReader (new FileReader(file));
+        read(filePath);
+    }
+
+    public static void read(String Path) throws IOException {
+        File file = new File(Path);
+        BufferedReader fileReader = new BufferedReader(new FileReader(file));
         String line;
         while ((line = fileReader.readLine()) != null) {
-            String[] splits = line.split(" ");
+            String[] strs = line.split(" ");
             Peer peer = new Peer();
-            peer.setID(Integer.valueOf(splits[0]));
-
+            peer.setID(strs[0]);
+            peer.setHostName(strs[1]);
+            peer.setPort(Integer.parseInt(strs[2]));
+            peer.setHasFileOrNot(strs[3].equals("1"));
+            peers.put(strs[0], peer);
         }
     }
+
 }
