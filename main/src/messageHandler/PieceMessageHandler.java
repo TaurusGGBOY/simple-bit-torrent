@@ -2,7 +2,7 @@ package messageHandler;
 
 import message.ActualMessage;
 
-public class ChokeMessageHandler{
+public class PieceMessageHandler {
     public void handle(ActualMessage msg) {
     }
 }

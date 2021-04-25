@@ -73,7 +73,7 @@ public class Client extends Thread {
         }
     }
 
-    public void shakeHands(String peerID, String hostName, int port) {
+    public void shakeHands(String peerID) {
         ShakeHandMessage msg = new ShakeHandMessage();
         msg.setPeerID(peerID);
         sendMessage(msg);

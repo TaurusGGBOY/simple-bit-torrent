@@ -61,15 +61,11 @@ public class LocalPeer {
         // 与这些人建立连接
         for (Map.Entry<String, Peer> entry : peers.entrySet()) {
             Peer peer = entry.getValue();
-            // 接收服务器注册
-            server.register(entry.getKey(), peer.getHostName(), peer.getPort());
             // 发送客户端注册
-            client.register(entry.getKey(), peer.getHostName(), peer.getPort());
+            String PeerID = entry.getKey();
+            client.register(PeerID, peer.getHostName(), peer.getPort());
             // 发送握手信息
-            client.shakeHands(entry.getKey(), peer.getHostName(), peer.getPort());
-            // 发送BitField信息
-            ActualMessage actualMessage = new ActualMessage(ActualMessage.BITFIELD, entry.getKey());
-            actualMessage.sendBitFieldMessage();
+            client.shakeHands(PeerID);
         }
 
         // 开启选举线程
