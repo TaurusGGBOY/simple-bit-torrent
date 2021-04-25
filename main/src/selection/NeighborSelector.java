@@ -43,10 +43,12 @@ public class NeighborSelector extends Thread {
                     return temp;
                 }
             });
-            // 将Topk加入
-            LocalPeer.peers.forEach((id, peer) -> {
-                topKRate.add(new AbstractMap.SimpleEntry<>(id, peer.getRate()));
-                peer.resetRate();
+            // 将对自己感兴趣的Topk加入
+            LocalPeer.peers.entrySet().stream().filter((entry) -> {
+                return entry.getValue().isInterstedInLocal();
+            }).forEach((entry) -> {
+                topKRate.add(new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().getRate()));
+                entry.getValue().resetRate();
             });
 
             // 将之前的清空

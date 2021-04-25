@@ -4,8 +4,6 @@ import cfg.CommonCfg;
 import cfg.PeerInfoCfg;
 import io.Client;
 import io.Server;
-import message.ActualMessage;
-import message.ShakeHandMessage;
 import selection.NeighborSelector;
 
 import java.io.IOException;
@@ -15,7 +13,8 @@ public class LocalPeer {
     // TODO 属性的顺序
     public static LinkedHashMap<String, Peer> peers;
     public static String id;
-    public static Set<Integer> pieces;
+    public static Peer localUser;
+    public static Map<Integer, String> pieceWaitingMap;
     // TODO 顺序之间是否需要空行
 
     // TODO 单例的顺序
@@ -30,11 +29,17 @@ public class LocalPeer {
             return;
         }
 
+        // 获取自己
+        localUser = peers.get(id);
+
+        // 初始化等待队列
+        pieceWaitingMap = new HashMap<>();
+
+
         // 如果有完整文件就将所有分片加入到自己的集合
-        pieces = new HashSet<>();
-        if (peers.get(id).isHasFileOrNot()) {
+        if (localUser.isHasFileOrNot()) {
             for (int i = 0; i < CommonCfg.maxPieceNum; i++) {
-                pieces.add(i);
+                localUser.pieces.add(i);
             }
         }
 

@@ -12,9 +12,12 @@ public class Peer {
     private int rate;
     private boolean choke;
     public Set<Integer> pieces;
+    private boolean interstedInLocal;
 
     public Peer() {
         pieces = new HashSet<>();
+        choke = true;
+        interstedInLocal = false;
     }
 
     public String getID() {
@@ -73,4 +76,11 @@ public class Peer {
         this.choke = choke;
     }
 
+    public boolean isInterstedInLocal() {
+        return interstedInLocal;
+    }
+
+    public void setInterstedInLocal(boolean interstedInLocal) {
+        this.interstedInLocal = interstedInLocal;
+    }
 }
