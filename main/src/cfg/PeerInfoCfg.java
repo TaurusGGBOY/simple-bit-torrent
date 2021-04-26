@@ -7,10 +7,10 @@ import java.util.LinkedHashMap;
 
 public class PeerInfoCfg {
 
-    // TODO 这个路径是否正确还未知
-    private final static String filePath = "/PeerInfo.cfg";
+    private final static String filePath = "./main/PeerInfo.cfg";
 
-    public static LinkedHashMap<String, Peer> peers;
+    public static LinkedHashMap<String, Peer> peers = new LinkedHashMap<>();
+
 
     public static void read() throws IOException {
         read(filePath);
@@ -21,7 +21,7 @@ public class PeerInfoCfg {
         BufferedReader fileReader = new BufferedReader(new FileReader(file));
         String line;
         while ((line = fileReader.readLine()) != null) {
-            String[] strs = line.split(" ");
+            String[] strs = line.split("\\s+");
             Peer peer = new Peer();
             peer.setID(strs[0]);
             peer.setHostName(strs[1]);

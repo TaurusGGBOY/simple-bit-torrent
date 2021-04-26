@@ -1,6 +1,5 @@
 package io;
 
-import javafx.beans.binding.MapExpression;
 import message.ActualMessage;
 import message.ShakeHandMessage;
 import messageHandler.ActualMessageHandler;
@@ -9,10 +8,8 @@ import peer.LocalPeer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,7 +24,7 @@ public class Server extends Thread {
 
     private Server() {
         invertedSocketMap = new HashMap<>();
-        PORT = LocalPeer.peers.get(LocalPeer.id).getPort();
+        PORT = LocalPeer.localUser.getPort();
         try {
             // 1. 得到监听通道
             listenerChannel = ServerSocketChannel.open();
@@ -90,11 +87,10 @@ public class Server extends Thread {
                 String msg = new String(buffer.array());
                 if (msg.startsWith(ShakeHandMessage.header)) {
                     ShakeHandMessage shakeHandMessage = new ShakeHandMessage(buffer.array());
-                    register(channel, shakeHandMessage.getPeerID());
-                    new ShakeHandMessageHandler().handle(shakeHandMessage);
+                    register(channel, shakeHandMessage.getPeerID());new ShakeHandMessageHandler().handle(shakeHandMessage);
                 } else {
                     ActualMessage actualMessage = new ActualMessage(buffer.array());
-                    actualMessage.setPeerID(invertedSocketMap.get(channel));
+                    actualMessage.setSendTo(invertedSocketMap.get(channel));
                     new ActualMessageHandler().handle(actualMessage);
                 }
             }

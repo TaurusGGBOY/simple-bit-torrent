@@ -5,27 +5,20 @@ import message.Message;
 import message.ShakeHandMessage;
 import peer.LocalPeer;
 import util.ByteUtil;
-import util.Logger;
+import log.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.Inet4Address;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread {
     private static Client client = new Client();
-
-    private Client() {
-    }
-
     public static Client getInstance() {
         return client;
     }
@@ -34,9 +27,13 @@ public class Client extends Thread {
     private ByteBuffer buffer;
     private Selector selector = null;
 
-    private Map<String, Socket> socketMap;
+    private Map<String, Socket>socketMap;
     private BlockingQueue<Message> messageQueue;
 
+    private Client() {
+        socketMap = new HashMap<>();
+        messageQueue = new LinkedBlockingQueue<>();
+    }
     @Override
     public void run() {
         socketMap = new HashMap<>();
@@ -52,7 +49,7 @@ public class Client extends Thread {
 
             if (msg instanceof ShakeHandMessage) {
                 // 如果是握手消息 则和ShakeHand
-                Socket socket = socketMap.get(((ShakeHandMessage) msg).getPeerID());
+                Socket socket = socketMap.get(msg.sendTo);
                 try {
                     OutputStream stream = socket.getOutputStream();
                     stream.write(msg.toBytes());
@@ -60,7 +57,7 @@ public class Client extends Thread {
                     e.printStackTrace();
                 }
             } else if (msg instanceof ActualMessage) {
-                Socket socket = socketMap.get(((ActualMessage) msg).getPeerID());
+                Socket socket = socketMap.get(((ActualMessage) msg).getSendTo());
                 try {
                     OutputStream stream = socket.getOutputStream();
                     stream.write(msg.toBytes());
@@ -75,7 +72,8 @@ public class Client extends Thread {
 
     public void shakeHands(String peerID) {
         ShakeHandMessage msg = new ShakeHandMessage();
-        msg.setPeerID(peerID);
+        msg.setPeerID(LocalPeer.id);
+        msg.sendTo = peerID;
         sendMessage(msg);
         Logger.makeConnection(LocalPeer.id,peerID);
     }

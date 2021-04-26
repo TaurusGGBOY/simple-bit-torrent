@@ -1,16 +1,11 @@
 package message;
 
-import io.Client;
-import io.Server;
-
-import java.io.IOException;
 import java.util.Arrays;
 
 public class ActualMessage extends Message {
     private int len;
     private int type;
     private byte[] payload;
-    private String peerID;
 
     public static final int CHOKE = 0;
     public static final int UNCHOKE = 1;
@@ -23,7 +18,8 @@ public class ActualMessage extends Message {
 
     public ActualMessage(int type, String peerID) {
         this.type = type;
-        this.peerID = peerID;
+        this.sendTo = peerID;
+        this.payload = new byte[0];
     }
 
     public ActualMessage(byte[] bytes) {
@@ -52,9 +48,8 @@ public class ActualMessage extends Message {
     }
 
     public void cacularAndSetLen() {
-        len = 4 + 1 + payload.length;
+        len = 4 + 1 + (payload == null ? 0 : payload.length);
     }
-
 
 
     public int getLen() {
@@ -81,11 +76,11 @@ public class ActualMessage extends Message {
         this.payload = payload;
     }
 
-    public String getPeerID() {
-        return peerID;
+    public String getSendTo() {
+        return sendTo;
     }
 
-    public void setPeerID(String peerID) {
-        this.peerID = peerID;
+    public void setSendTo(String sendTo) {
+        this.sendTo = sendTo;
     }
 }

@@ -5,11 +5,9 @@ import message.ActualMessage;
 import peer.LocalPeer;
 import util.ByteUtil;
 
-import java.io.PipedReader;
-
 public class RequestMessageHandler {
     public void handle(ActualMessage msg) {
-        if (LocalPeer.peers.get(msg.getPeerID()).isChoke()) {
+        if (LocalPeer.peers.get(msg.getSendTo()).isChoke()) {
             return;
         }
         int index = ByteUtil.byteArrayToInt(msg.getPayload());
@@ -18,6 +16,6 @@ public class RequestMessageHandler {
         byte[] piece = null;
 
         // 发送给远方
-        Client.getInstance().sendPieceMessage(msg.getPeerID(), index, piece);
+        Client.getInstance().sendPieceMessage(msg.getSendTo(), index, piece);
     }
 }

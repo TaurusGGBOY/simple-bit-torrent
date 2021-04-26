@@ -2,19 +2,20 @@ package peer;
 
 import cfg.CommonCfg;
 import cfg.PeerInfoCfg;
+import file.PieceFile;
 import io.Client;
 import io.Server;
 import selection.NeighborSelector;
-import util.Logger;
+import log.Logger;
 
 import java.io.IOException;
 import java.util.*;
 
 public class LocalPeer {
-    public static LinkedHashMap<String, Peer> peers;
+    public static LinkedHashMap<String, Peer> peers = new LinkedHashMap<>();
     public static String id;
     public static Peer localUser;
-    public static Map<Integer, String> pieceWaitingMap;
+    public static Map<Integer, String> pieceWaitingMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         // 读取配置文件
@@ -30,7 +31,7 @@ public class LocalPeer {
         id = args[0];
 
         // 获取自己
-        localUser = peers.get(id);
+        localUser = PeerInfoCfg.peers.get(id);
 
         // 初始化设置logger id
         Logger.id = id;
@@ -43,11 +44,20 @@ public class LocalPeer {
 
         // 如果有完整文件就将所有分片加入到自己的集合
         if (localUser.isHasFileOrNot()) {
+            // 将文件分开
+            PieceFile.spilt("./main/" + CommonCfg.fileName, CommonCfg.maxPieceNum, CommonCfg.pieceSize, id);
+
+            // piece填充
             for (int i = 0; i < CommonCfg.maxPieceNum; i++) {
                 localUser.pieces.add(i);
             }
         }
 
+        // 启动本地监听服务器
+        Server server = Server.getInstance();
+        server.start();
+        Client client = Client.getInstance();
+        client.start();
 
         //将配置文件信息写入到local用户，用来添加新连接
         LinkedHashMap<String, Peer> allPeers = PeerInfoCfg.peers;
@@ -57,23 +67,9 @@ public class LocalPeer {
             if (peer.getKey().equals(id)) {
                 break;
             }
-            peers.put(peer.getKey(), peer.getValue());
-        }
-
-        // 启动本地监听服务器
-        Server server = Server.getInstance();
-        server.start();
-        Client client = Client.getInstance();
-        client.start();
-
-        // 与这些人建立连接
-        for (Map.Entry<String, Peer> entry : peers.entrySet()) {
-            Peer peer = entry.getValue();
-            // 发送客户端注册
-            String PeerID = entry.getKey();
-            client.register(PeerID, peer.getHostName(), peer.getPort());
+            client.register(peer.getKey(), peer.getValue().getHostName(), peer.getValue().getPort());
             // 发送握手信息
-            client.shakeHands(PeerID);
+            client.shakeHands(peer.getKey());
         }
 
         // 开启选举线程

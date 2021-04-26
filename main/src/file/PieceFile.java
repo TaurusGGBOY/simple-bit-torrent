@@ -1,12 +1,28 @@
 package file;
 
+import cfg.CommonCfg;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 
 public class PieceFile {
+    public static String currentDir;
     //splitNum:要分几片，currentDir：分片后存放的位置，subSize：按多大分片
+
+
+    public static void spilt(String filePath, int splitNum, double subSize, String id) {
+        currentDir = "./main/piece/id_" + id;
+        File dir = new File(currentDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        try {
+            nioSpilt(new File(filePath), splitNum, currentDir, CommonCfg.pieceSize);
+        } catch (Exception e) {
+        }
+    }
 
     public static void nioSpilt(File file, int splitNum, String currentDir, double subSize) throws Exception {
         FileInputStream fis = new FileInputStream(file);

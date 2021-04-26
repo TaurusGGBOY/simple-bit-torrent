@@ -10,7 +10,7 @@ public class ShakeHandMessage extends Message {
 
     public ShakeHandMessage(byte[] bytes) {
         String str = new String(bytes);
-        peerID = str.substring(bytes.length - 4);
+        peerID = str.substring(28,32);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package util;
+package log;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,7 +14,11 @@ public class Logger {
     private static DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void createLogFile() {
-        logPath = "./peer_" + id + ".log";
+        File dir = new File("./main/log");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        logPath = "./main/log/peer_" + id + ".log";
         File file = new File(logPath);
         try {
             if (file.exists() && file.isFile())

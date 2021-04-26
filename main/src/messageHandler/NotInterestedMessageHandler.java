@@ -2,13 +2,13 @@ package messageHandler;
 
 import message.ActualMessage;
 import peer.LocalPeer;
-import util.Logger;
+import log.Logger;
 
 public class NotInterestedMessageHandler {
     public void handle(ActualMessage msg) {
-        LocalPeer.peers.get(msg.getPeerID()).setInterstedInLocal(false);
+        LocalPeer.peers.get(msg.getSendTo()).setInterstedInLocal(false);
 
         // log NotInterested
-        Logger.receiveNotInterested(LocalPeer.id, msg.getPeerID());
+        Logger.receiveNotInterested(LocalPeer.id, msg.getSendTo());
     }
 }

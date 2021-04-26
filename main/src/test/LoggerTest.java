@@ -1,6 +1,6 @@
 package test;
 
-import util.Logger;
+import log.Logger;
 
 import java.util.ArrayList;
 import java.util.List;

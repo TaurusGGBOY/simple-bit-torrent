@@ -5,7 +5,7 @@ import io.Client;
 import message.ActualMessage;
 import peer.LocalPeer;
 import util.ByteUtil;
-import util.Logger;
+import log.Logger;
 
 import java.util.*;
 
@@ -23,20 +23,20 @@ public class PieceMessageHandler {
         // TODO 保存piece
 
         //log
-        Logger.finishPiece(LocalPeer.id, msg.getPeerID(), index, LocalPeer.localUser.pieces.size());
+        Logger.finishPiece(LocalPeer.id, msg.getSendTo(), index, LocalPeer.localUser.pieces.size());
         if (LocalPeer.localUser.pieces.size() >= CommonCfg.maxPieceNum) {
             Logger.finishFile(LocalPeer.id);
         }
 
         // 如果choke了 就停止发request
-        if (LocalPeer.peers.get(msg.getPeerID()).isChoke()) {
+        if (LocalPeer.peers.get(msg.getSendTo()).isChoke()) {
             return;
         }
 
         // 遍历看还对远方感兴趣否
         List<Integer> list = new ArrayList<>();
 
-        for (int piece : LocalPeer.peers.get(msg.getPeerID()).pieces) {
+        for (int piece : LocalPeer.peers.get(msg.getSendTo()).pieces) {
             if (!LocalPeer.localUser.pieces.contains(piece)) {
                 list.add(piece);
             }
@@ -46,6 +46,6 @@ public class PieceMessageHandler {
             return;
         }
 
-        Client.getInstance().sendRequestMessage(msg.getPeerID(), list.get(new Random().nextInt(list.size())));
+        Client.getInstance().sendRequestMessage(msg.getSendTo(), list.get(new Random().nextInt(list.size())));
     }
 }

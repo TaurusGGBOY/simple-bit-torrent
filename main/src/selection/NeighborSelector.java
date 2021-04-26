@@ -1,18 +1,11 @@
 package selection;
 
-import cfg.CommonCfg;
 import io.Client;
-import io.Server;
-import message.ActualMessage;
 import peer.LocalPeer;
 import peer.Peer;
-import sun.rmi.runtime.Log;
-import util.Logger;
+import log.Logger;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class NeighborSelector extends Thread {
@@ -35,6 +28,10 @@ public class NeighborSelector extends Thread {
     private class PreferedNeighborSelctor extends TimerTask {
         @Override
         public void run() {
+            // 如果所有名单为空 就不选举
+            if (LocalPeer.peers.size() <= 0) {
+                return;
+            }
             Queue<AbstractMap.SimpleEntry<String, Integer>> topKRate = new PriorityQueue<>(new Comparator<AbstractMap.SimpleEntry<String, Integer>>() {
                 @Override
                 public int compare(AbstractMap.SimpleEntry<String, Integer> o1, AbstractMap.SimpleEntry<String, Integer> o2) {
@@ -45,6 +42,12 @@ public class NeighborSelector extends Thread {
                     return temp;
                 }
             });
+
+            // 如果没有就返回
+            if (topKRate.size() <= 0) {
+                return;
+            }
+
             // 将对自己感兴趣的Topk加入
             LocalPeer.peers.entrySet().stream().filter((entry) -> {
                 return entry.getValue().isInterstedInLocal();
@@ -85,9 +88,20 @@ public class NeighborSelector extends Thread {
     private class OptUnchokingNeighborSelcteTask extends TimerTask {
         @Override
         public void run() {
-            List<Map.Entry<String, Peer>> chokeList = LocalPeer.peers.entrySet().stream().filter((entry) -> {
-                return entry.getValue().isChoke();
-            }).collect(Collectors.toList());
+            // 如果所有名单为空 就不选举
+            if (LocalPeer.peers.size() <= 0) {
+                return;
+            }
+
+            // 如果失败就返回
+            List<Map.Entry<String, Peer>> chokeList;
+            try {
+                chokeList = LocalPeer.peers.entrySet().stream().filter((entry) -> {
+                    return entry.getValue().isChoke();
+                }).collect(Collectors.toList());
+            } catch (Exception e) {
+                return;
+            }
 
             Random random = new Random();
             Map.Entry<String, Peer> optPeer = chokeList.get(random.nextInt(chokeList.size()));
@@ -96,7 +110,11 @@ public class NeighborSelector extends Thread {
             // 如果不在prefered里面可能变成choke
             if (!preferedNeighbors.contains(optimisticUnchokingID)) {
                 Client.getInstance().sendChokeMessage(optimisticUnchokingID);
-                LocalPeer.peers.get(optimisticUnchokingID).setChoke(true);
+                try {
+                    LocalPeer.peers.get(optimisticUnchokingID).setChoke(true);
+                } catch (Exception e) {
+                    // 说明第一次设置 不用管这个
+                }
             }
 
             // 新来的一定会变成Unchoke 因为是在choke中选择的
@@ -116,10 +134,10 @@ public class NeighborSelector extends Thread {
     public void run() {
         Timer timer1 = new Timer();
         TimerTask preferedNeighborSelectTask = new PreferedNeighborSelctor();
-        timer1.schedule(preferedNeighborSelectTask, 0, 1000 * preferedNeighborSelcteInterval);
+        timer1.schedule(preferedNeighborSelectTask, 1000 * preferedNeighborSelcteInterval, 1000 * preferedNeighborSelcteInterval);
 
         Timer timer2 = new Timer();
         TimerTask optUnchokingNeighborSelcteTask = new OptUnchokingNeighborSelcteTask();
-        timer2.schedule(optUnchokingNeighborSelcteTask, 0, 1000 * optimisticUnchokingInterval);
+        timer2.schedule(optUnchokingNeighborSelcteTask, 1000 * optimisticUnchokingInterval, 1000 * optimisticUnchokingInterval);
     }
 }
