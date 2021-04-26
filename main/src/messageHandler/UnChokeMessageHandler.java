@@ -12,7 +12,7 @@ import java.util.Random;
 
 public class UnChokeMessageHandler {
     public void handle(ActualMessage msg) {
-        Peer remotePeer = LocalPeer.peers.get(msg.getSendTo());
+        Peer remotePeer = LocalPeer.peers.get(msg.getFrom());
         remotePeer.setChoke(false);
 
         // log
@@ -30,7 +30,7 @@ public class UnChokeMessageHandler {
             return;
         }
 
-        Client.getInstance().sendRequestMessage(msg.getSendTo(), list.get(new Random().nextInt(list.size())));
+        Client.getInstance().sendRequestMessage(msg.getFrom(), list.get(new Random().nextInt(list.size())));
 
     }
 }

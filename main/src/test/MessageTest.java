@@ -1,17 +1,14 @@
 package test;
 
-import message.ActualMessage;
 import message.ShakeHandMessage;
-
-import java.util.Arrays;
 
 public class MessageTest {
     public static void shakeHandTest(String id) {
         ShakeHandMessage msg1 = new ShakeHandMessage();
-        msg1.setPeerID(id);
+        msg1.setFrom(id);
         System.out.println(msg1.toString());
         ShakeHandMessage msg2 = new ShakeHandMessage(msg1.toString().getBytes());
-        System.out.println(msg2.getPeerID());
+        System.out.println(msg2.getFrom());
     }
 
 //    public static void actualMessageTest(String payload) {

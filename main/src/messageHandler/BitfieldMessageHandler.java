@@ -10,6 +10,9 @@ import java.util.Set;
 
 public class BitfieldMessageHandler {
     public void handle(ActualMessage msg) {
+        String from = msg.getFrom();
+        Logger.receiveBitfield(LocalPeer.id, from);
+
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < msg.getPayload().length; i++) {
             for (int j = 7; j >= 0; j--) {
@@ -19,7 +22,7 @@ public class BitfieldMessageHandler {
 
         // 更新该peer的pieces set
         char[] chars = sb.toString().toCharArray();
-        Set<Integer> pieces = LocalPeer.peers.get(msg.getSendTo()).pieces;
+        Set<Integer> pieces = LocalPeer.peers.get(from).pieces;
         for (int i = 0; i < chars.length; i++) {
             if (chars[i] == '1') {
                 pieces.add(i);
@@ -28,14 +31,14 @@ public class BitfieldMessageHandler {
 
         // 如果该peer都有了 log
         if (pieces.size() >= CommonCfg.maxPieceNum) {
-            Logger.finishFile(msg.getSendTo());
+            Logger.finishFile(msg.getFrom());
         }
 
         // 遍历收到的bitfield 如果有感兴趣的就发送感兴趣
         boolean interested = false;
         for (int piece : pieces) {
             if (!LocalPeer.localUser.pieces.contains(piece)) {
-                Client.getInstance().sendInterestedMessage(msg.getSendTo());
+                Client.getInstance().sendInterestedMessage(from);
                 interested = true;
                 break;
             }
@@ -43,7 +46,7 @@ public class BitfieldMessageHandler {
 
         // 如果不感兴趣就发送不感兴趣
         if (!interested) {
-            Client.getInstance().sendNotInterestedMessage(msg.getSendTo());
+            Client.getInstance().sendNotInterestedMessage(from);
         }
 
         // 检查是否结束

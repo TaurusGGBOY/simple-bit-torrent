@@ -95,20 +95,21 @@ public class NeighborSelector extends Thread {
 
             // 如果失败就返回
             List<Map.Entry<String, Peer>> chokeList;
+            Map.Entry<String, Peer> optPeer;
             try {
                 chokeList = LocalPeer.peers.entrySet().stream().filter((entry) -> {
                     return entry.getValue().isChoke();
                 }).collect(Collectors.toList());
+                Random random = new Random();
+                optPeer = chokeList.get(random.nextInt(chokeList.size()));
             } catch (Exception e) {
                 return;
             }
 
-            Random random = new Random();
-            Map.Entry<String, Peer> optPeer = chokeList.get(random.nextInt(chokeList.size()));
-
             // 注意 因为在choke之中选的 所以一定不会选到原来那个，但是他可能会变成unchoke？
             // 如果不在prefered里面可能变成choke
-            if (!preferedNeighbors.contains(optimisticUnchokingID)) {
+            // 要考虑 optimisticUnchokingID
+            if (!preferedNeighbors.contains(optimisticUnchokingID) && optimisticUnchokingID != null) {
                 Client.getInstance().sendChokeMessage(optimisticUnchokingID);
                 try {
                     LocalPeer.peers.get(optimisticUnchokingID).setChoke(true);

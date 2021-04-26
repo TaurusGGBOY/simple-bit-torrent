@@ -16,6 +16,7 @@ public class LocalPeer {
     public static String id;
     public static Peer localUser;
     public static Map<Integer, String> pieceWaitingMap = new HashMap<>();
+    public static Set<String> shakingHands = new HashSet<>();
 
     public static void main(String[] args) throws IOException {
         // 读取配置文件
@@ -82,6 +83,13 @@ public class LocalPeer {
             if (peer.pieces.size() < CommonCfg.maxPieceNum) {
                 return;
             }
+        }
+        if (localUser.pieces.size() < CommonCfg.maxPieceNum) {
+            return;
+        }
+
+        for (Peer peer : peers.values()) {
+            PieceFile.merge("cpabe.rar", CommonCfg.maxPieceNum, peer.getID());
         }
         System.exit(0);
     }

@@ -7,7 +7,7 @@ import util.ByteUtil;
 
 public class RequestMessageHandler {
     public void handle(ActualMessage msg) {
-        if (LocalPeer.peers.get(msg.getSendTo()).isChoke()) {
+        if (LocalPeer.peers.get(msg.getFrom()).isChoke()) {
             return;
         }
         int index = ByteUtil.byteArrayToInt(msg.getPayload());
@@ -16,6 +16,6 @@ public class RequestMessageHandler {
         byte[] piece = null;
 
         // 发送给远方
-        Client.getInstance().sendPieceMessage(msg.getSendTo(), index, piece);
+        Client.getInstance().sendPieceMessage(msg.getFrom(), index, piece);
     }
 }

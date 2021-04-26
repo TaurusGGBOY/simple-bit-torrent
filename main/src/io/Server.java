@@ -87,10 +87,11 @@ public class Server extends Thread {
                 String msg = new String(buffer.array());
                 if (msg.startsWith(ShakeHandMessage.header)) {
                     ShakeHandMessage shakeHandMessage = new ShakeHandMessage(buffer.array());
-                    register(channel, shakeHandMessage.getPeerID());new ShakeHandMessageHandler().handle(shakeHandMessage);
+                    register(channel, shakeHandMessage.getFrom());
+                    new ShakeHandMessageHandler().handle(shakeHandMessage);
                 } else {
                     ActualMessage actualMessage = new ActualMessage(buffer.array());
-                    actualMessage.setSendTo(invertedSocketMap.get(channel));
+                    actualMessage.setFrom(invertedSocketMap.get(channel));
                     new ActualMessageHandler().handle(actualMessage);
                 }
             }

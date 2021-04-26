@@ -7,6 +7,9 @@ public class ActualMessage extends Message {
     private int type;
     private byte[] payload;
 
+    private String from;
+    private String to;
+
     public static final int CHOKE = 0;
     public static final int UNCHOKE = 1;
     public static final int INTERESTED = 2;
@@ -16,9 +19,10 @@ public class ActualMessage extends Message {
     public static final int REQUEST = 6;
     public static final int PIECE = 7;
 
-    public ActualMessage(int type, String peerID) {
+    public ActualMessage(int type, String from, String to) {
         this.type = type;
-        this.sendTo = peerID;
+        this.from = from;
+        this.to = to;
         this.payload = new byte[0];
     }
 
@@ -76,11 +80,19 @@ public class ActualMessage extends Message {
         this.payload = payload;
     }
 
-    public String getSendTo() {
-        return sendTo;
+    public String getFrom() {
+        return from;
     }
 
-    public void setSendTo(String sendTo) {
-        this.sendTo = sendTo;
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
     }
 }

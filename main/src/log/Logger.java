@@ -77,6 +77,10 @@ public class Logger {
         log("Peer " + localID + " has the optimistically unchoked neighbor " + remoteID);
     }
 
+    public static void receiveBitfield(String localID, String remoteID) {
+        log("Peer " + localID + " receive bitfield from " + remoteID);
+    }
+
     public static void receiveUnchoke(String localID, String remoteID) {
         log("Peer " + localID + " is unchoked by " + remoteID);
     }
