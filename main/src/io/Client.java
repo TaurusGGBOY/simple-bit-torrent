@@ -3,7 +3,9 @@ package io;
 import message.ActualMessage;
 import message.Message;
 import message.ShakeHandMessage;
+import peer.LocalPeer;
 import util.ByteUtil;
+import util.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -75,6 +77,7 @@ public class Client extends Thread {
         ShakeHandMessage msg = new ShakeHandMessage();
         msg.setPeerID(peerID);
         sendMessage(msg);
+        Logger.makeConnection(LocalPeer.id,peerID);
     }
 
     public void sendMessage(Message message) {

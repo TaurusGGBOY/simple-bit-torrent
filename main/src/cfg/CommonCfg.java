@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class CommonCfg {
 
-    private final static String filePath = "/Common.cfg";
+    private final static String filePath = "./main/Common.cfg";
 
     // TODO 这个文件名字和文件大小是自己指定的？
     public static int numberOfPreferredNeighbors;

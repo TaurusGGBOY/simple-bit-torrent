@@ -5,21 +5,18 @@ import cfg.PeerInfoCfg;
 import io.Client;
 import io.Server;
 import selection.NeighborSelector;
+import util.Logger;
 
 import java.io.IOException;
 import java.util.*;
 
 public class LocalPeer {
-    // TODO 属性的顺序
     public static LinkedHashMap<String, Peer> peers;
     public static String id;
     public static Peer localUser;
     public static Map<Integer, String> pieceWaitingMap;
-    // TODO 顺序之间是否需要空行
 
-    // TODO 单例的顺序
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // 读取配置文件
         try {
             CommonCfg.read();
@@ -29,12 +26,20 @@ public class LocalPeer {
             return;
         }
 
+        // 获取当前的ID
+        id = args[0];
+
         // 获取自己
         localUser = peers.get(id);
 
+        // 初始化设置logger id
+        Logger.id = id;
+
+        // 创建Logger文件夹
+        Logger.createLogFile();
+
         // 初始化等待队列
         pieceWaitingMap = new HashMap<>();
-
 
         // 如果有完整文件就将所有分片加入到自己的集合
         if (localUser.isHasFileOrNot()) {
@@ -43,8 +48,6 @@ public class LocalPeer {
             }
         }
 
-        // 获取当前的ID
-        id = args[0];
 
         //将配置文件信息写入到local用户，用来添加新连接
         LinkedHashMap<String, Peer> allPeers = PeerInfoCfg.peers;
@@ -76,6 +79,15 @@ public class LocalPeer {
         // 开启选举线程
         NeighborSelector neighborSelector = new NeighborSelector(CommonCfg.unchokingInterval, CommonCfg.optimisticUnchokingInterval, CommonCfg.numberOfPreferredNeighbors);
         neighborSelector.start();
+    }
+
+    public static void checkFinish() {
+        for (Peer peer : peers.values()) {
+            if (peer.pieces.size() < CommonCfg.maxPieceNum) {
+                return;
+            }
+        }
+        System.exit(0);
     }
 
 

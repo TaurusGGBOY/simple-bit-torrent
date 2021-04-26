@@ -4,6 +4,7 @@ import io.Client;
 import message.ActualMessage;
 import peer.LocalPeer;
 import peer.Peer;
+import util.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,9 @@ public class UnChokeMessageHandler {
     public void handle(ActualMessage msg) {
         Peer remotePeer = LocalPeer.peers.get(msg.getPeerID());
         remotePeer.setChoke(false);
+
+        // log
+        Logger.receiveUnchoke(LocalPeer.id,remotePeer.getID());
 
         List<Integer> list = new ArrayList<>();
         for (int piece : remotePeer.pieces) {

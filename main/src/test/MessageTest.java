@@ -14,24 +14,24 @@ public class MessageTest {
         System.out.println(msg2.getPeerID());
     }
 
-    public static void actualMessageTest(String payload) {
-        ActualMessage msg1 = new ActualMessage();
-        msg1.setLen(1);
-        msg1.setType(2);
-        msg1.setPayload(payload.getBytes());
-        System.out.println(msg1.toString());
-        ActualMessage msg2 = new ActualMessage(msg1.toBytes());
-        System.out.println(new String(msg2.getPayload()));
-    }
+//    public static void actualMessageTest(String payload) {
+//        ActualMessage msg1 = new ActualMessage();
+//        msg1.setLen(1);
+//        msg1.setType(2);
+//        msg1.setPayload(payload.getBytes());
+//        System.out.println(msg1.toString());
+//        ActualMessage msg2 = new ActualMessage(msg1.toBytes());
+//        System.out.println(new String(msg2.getPayload()));
+//    }
 
     public static void main(String[] args) {
 //        shakeHandTest("0008");
 //        shakeHandTest("0080");
 //        shakeHandTest("0800");
 //        shakeHandTest("8800");
-        actualMessageTest("0008");
-        actualMessageTest("0088");
-        actualMessageTest("08888");
-        actualMessageTest("08808");
+//        actualMessageTest("0008");
+//        actualMessageTest("0088");
+//        actualMessageTest("08888");
+//        actualMessageTest("08808");
     }
 }

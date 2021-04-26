@@ -5,6 +5,7 @@ import io.Client;
 import message.ShakeHandMessage;
 import peer.LocalPeer;
 import peer.Peer;
+import util.Logger;
 
 import java.net.Socket;
 
@@ -12,6 +13,7 @@ public class ShakeHandMessageHandler {
     public void handle(ShakeHandMessage msg) {
         // 检测是否给他发过了 如果发过了 就说明是feedback 不用管
         if (LocalPeer.peers.containsKey(msg.getPeerID())) {
+            Logger.isConnection(LocalPeer.id,msg.getPeerID());
             Client.getInstance().sendBitFieldMessage(msg.getPeerID());
             return;
         }
@@ -28,6 +30,7 @@ public class ShakeHandMessageHandler {
         Client.getInstance().register(peer.getID(), peer.getHostName(), peer.getPort());
 
         // 并握手
+        Logger.makeConnection(LocalPeer.id,msg.getPeerID());
         Client.getInstance().shakeHands(peer.getID());
 
         // 并发送bitfield

@@ -6,6 +6,8 @@ import io.Server;
 import message.ActualMessage;
 import peer.LocalPeer;
 import peer.Peer;
+import sun.rmi.runtime.Log;
+import util.Logger;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -59,6 +61,11 @@ public class NeighborSelector extends Thread {
                 preferedNeighbors.add(entry.getKey());
             });
 
+            // log
+            List<String> list = new ArrayList<>(preferedNeighbors);
+            list.sort(null);
+            Logger.changePrefered(LocalPeer.id, list);
+
             // 检查preferedNeighbors里面原来是choke的，发送unchoke消息
             preferedNeighbors.stream().filter((id) -> {
                 return LocalPeer.peers.get(id).isChoke();
@@ -92,13 +99,16 @@ public class NeighborSelector extends Thread {
                 LocalPeer.peers.get(optimisticUnchokingID).setChoke(true);
             }
 
-            // 新来的一定会变成choke
+            // 新来的一定会变成Unchoke 因为是在choke中选择的
             Client.getInstance().sendUnchokeMessage(optPeer.getKey());
 
             LocalPeer.peers.get(optPeer.getKey()).setChoke(false);
 
             // 改变optID
             optimisticUnchokingID = optPeer.getKey();
+
+            // log
+            Logger.changeOpt(LocalPeer.id, optimisticUnchokingID);
         }
     }
 

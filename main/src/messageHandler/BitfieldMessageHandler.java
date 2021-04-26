@@ -1,9 +1,11 @@
 package messageHandler;
 
+import cfg.CommonCfg;
 import io.Client;
 import message.ActualMessage;
 import peer.LocalPeer;
 import peer.Peer;
+import util.Logger;
 
 import java.util.Set;
 
@@ -16,7 +18,7 @@ public class BitfieldMessageHandler {
             }
         }
 
-        // 跟新该peer的pieces set
+        // 更新该peer的pieces set
         char[] chars = sb.toString().toCharArray();
         Set<Integer> pieces = LocalPeer.peers.get(msg.getPeerID()).pieces;
         for (int i = 0; i < chars.length; i++) {
@@ -25,12 +27,27 @@ public class BitfieldMessageHandler {
             }
         }
 
+        // 如果该peer都有了 log
+        if (pieces.size() >= CommonCfg.maxPieceNum) {
+            Logger.finishFile(msg.getPeerID());
+        }
+
         // 遍历收到的bitfield 如果有感兴趣的就发送感兴趣
+        boolean interested = false;
         for (int piece : pieces) {
             if (!LocalPeer.localUser.pieces.contains(piece)) {
                 Client.getInstance().sendInterestedMessage(msg.getPeerID());
+                interested = true;
                 break;
             }
         }
+
+        // 如果不感兴趣就发送不感兴趣
+        if (!interested) {
+            Client.getInstance().sendNotInterestedMessage(msg.getPeerID());
+        }
+
+        // 检查是否结束
+        LocalPeer.checkFinish();
     }
 }
