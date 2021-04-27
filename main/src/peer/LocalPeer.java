@@ -38,6 +38,9 @@ public class LocalPeer {
         // 初始化设置logger id
         Logger.id = id;
 
+        // 删除文件夹
+        PieceFile.removeDirById(id);
+
         // 创建Logger文件夹
         Logger.createLogFile();
 
@@ -69,9 +72,23 @@ public class LocalPeer {
             if (peer.getKey().equals(id)) {
                 break;
             }
-            client.register(peer.getKey(), peer.getValue().getHostName(), peer.getValue().getPort());
-            // 发送握手信息
-            client.shakeHands(peer.getKey());
+            try {
+                client.register(peer.getKey(), peer.getValue().getHostName(), peer.getValue().getPort());
+                // 发送握手信息
+                client.shakeHands(peer.getKey());
+            } catch (Exception e) {
+                // 如果失败 十秒后重试一次
+                new Timer("Socket Create").schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            client.register(peer.getKey(), peer.getValue().getHostName(), peer.getValue().getPort());
+                        } catch (IOException ioException) {
+                        }
+                    }
+                }, 10000);
+                e.printStackTrace();
+            }
         }
 
         // 开启选举线程
@@ -90,9 +107,7 @@ public class LocalPeer {
         }
         Logger.finish(localUser.getID());
 
-        for (Peer peer : peers.values()) {
-            PieceFile.merge("cpabe.rar", CommonCfg.maxPieceNum, peer.getID());
-        }
+        PieceFile.merge("cpabe.rar", CommonCfg.maxPieceNum, localUser.getID());
         System.exit(0);
     }
 

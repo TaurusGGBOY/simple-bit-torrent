@@ -11,9 +11,10 @@ public class PieceFile {
     // 保存piece
     public static byte[] readPiece(int index, String id) {
         String currentDir = "./main/piece/id_" + id + File.separator + "piece_" + index;
+        File file = new File(currentDir);
         try {
             // 创建一个bytebuffer内存块
-            ByteBuffer byteBuffer = ByteBuffer.allocate(1024 * 33);
+            ByteBuffer byteBuffer = ByteBuffer.allocate((int) file.length());
             // 创建文件输出流
             FileInputStream fileInputStream = new FileInputStream(currentDir);
             // 创建文件通道
@@ -45,7 +46,7 @@ public class PieceFile {
         try {
             file.createNewFile();
             // 创建一个bytebuffer内存块
-            ByteBuffer byteBuffer = ByteBuffer.allocate(1024 * 32 * 2);
+            ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
             // 将字符串内容存入bytebuffer
             byteBuffer.put(bytes);
             // 创建文件输出流
@@ -143,6 +144,18 @@ public class PieceFile {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void removeDirById(String id) {
+        String path = "./main/piece/id_" + id;
+        File f = new File(path);
+        if (f.isDirectory()) {//如果是目录，先递归删除
+            String[] list = f.list();
+            for (int i = 0; i < list.length; i++) {
+                removeDir(path + "//" + list[i]);//先删除目录下的文件
+            }
+        }
+        f.delete();
     }
 
     public static void removeDir(String path) {

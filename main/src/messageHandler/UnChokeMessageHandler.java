@@ -20,7 +20,8 @@ public class UnChokeMessageHandler {
 
         List<Integer> list = new ArrayList<>();
         for (int piece : remotePeer.pieces) {
-            if (!LocalPeer.localUser.pieces.contains(piece)) {
+            // 保证等待队列没有才加入
+            if (!LocalPeer.localUser.pieces.contains(piece)&&!LocalPeer.pieceWaitingMap.containsKey(piece)) {
                 list.add(piece);
             }
         }

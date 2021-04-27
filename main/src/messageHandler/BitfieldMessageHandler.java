@@ -11,10 +11,11 @@ import java.util.Set;
 
 public class BitfieldMessageHandler {
     public void handle(ActualMessage msg) {
+        System.out.println("来自peerID的bitfield:"+msg.getFrom());
+
         String from = msg.getFrom();
         Logger.receiveBitfield(LocalPeer.id, from);
 
-        // TODO 收到bitfiled之后 怎么转换成index
         int bitfieldLen = msg.getLen() - 1;
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < bitfieldLen; i++) {
@@ -51,6 +52,7 @@ public class BitfieldMessageHandler {
         }
 
         // 检查是否结束
-        LocalPeer.checkFinish();
+        if (pieces.size() >= CommonCfg.maxPieceNum)
+            LocalPeer.checkFinish();
     }
 }

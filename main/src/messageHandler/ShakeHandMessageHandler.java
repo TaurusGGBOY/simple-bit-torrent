@@ -7,6 +7,8 @@ import peer.LocalPeer;
 import peer.Peer;
 import log.Logger;
 
+import java.io.IOException;
+
 public class ShakeHandMessageHandler {
     public void handle(ShakeHandMessage msg) {
         // 情况1: 发送方接收到了返回的握手 应该发送bitfiled
@@ -29,7 +31,11 @@ public class ShakeHandMessageHandler {
         LocalPeer.peers.put(msg.getFrom(), peer);
 
         // 注册这个套接字
-        Client.getInstance().register(peer.getID(), peer.getHostName(), peer.getPort());
+        try {
+            Client.getInstance().register(peer.getID(), peer.getHostName(), peer.getPort());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // 并发送握手
         Client.getInstance().sendShakeHandMessage(peer.getID());
@@ -40,5 +46,6 @@ public class ShakeHandMessageHandler {
 
         // 并发送bitfield
         Client.getInstance().sendBitFieldMessage(peer.getID());
+        System.out.println("你是主动给我发的 我给你发bitfield"+peer.getID());
     }
 }

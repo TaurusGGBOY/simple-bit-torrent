@@ -16,16 +16,16 @@ public class PieceMessageHandler {
         byte[] payload = msg.getPayload();
         int index = ByteUtil.byteArrayToInt(Arrays.copyOfRange(payload, 0, 4));
 
+        // 等待队列中去掉
+        LocalPeer.pieceWaitingMap.remove(index);
+
+        // 保存piece
+        PieceFile.savePiece(index, LocalPeer.id, Arrays.copyOfRange(payload, 4, msg.getLen() - 1));
+
         LocalPeer.localUser.pieces.add(index);
 
         // 检查是否结束
         LocalPeer.checkFinish();
-
-        // TODO 添加定时任务清除
-        LocalPeer.pieceWaitingMap.remove(index);
-
-        // 保存piece
-        PieceFile.savePiece(index, LocalPeer.id, Arrays.copyOfRange(payload, 4, 4 + msg.getLen() - 1));
 
         //log
         Logger.finishPiece(LocalPeer.id, msg.getFrom(), index, LocalPeer.localUser.pieces.size());
@@ -33,9 +33,8 @@ public class PieceMessageHandler {
             Logger.finishFile(LocalPeer.id);
         }
 
-        // 给除了接收方的其他所有老哥询问have消息
+        // 给所有老哥询问have消息 包括接收方
         LocalPeer.peers.entrySet().stream()
-                .filter((entry) -> !msg.getFrom().equals(entry.getKey()) && !entry.getValue().pieces.contains(index))
                 .forEach((entry -> Client.getInstance().sendHaveMessage(entry.getKey(), index)));
 
         // 如果choke了 就停止发request

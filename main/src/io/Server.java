@@ -80,7 +80,7 @@ public class Server extends Thread {
         try {
             //得到关联的通道
             channel = (SocketChannel) key.channel();
-            ByteBuffer buffer = ByteBuffer.allocate(1024 * 33);
+            ByteBuffer buffer = ByteBuffer.allocate(1024 * 34);
             int count = channel.read(buffer);
             if (count > 0) {
                 String msg = new String(buffer.array());
@@ -88,9 +88,18 @@ public class Server extends Thread {
                     ShakeHandMessage shakeHandMessage = new ShakeHandMessage(buffer.array());
                     register(channel, shakeHandMessage.getFrom());
                     new ShakeHandMessageHandler().handle(shakeHandMessage);
+                    if (shakeHandMessage.getFrom().equals("1002") && LocalPeer.id.equals("1005")) {
+                        System.out.println("握手了");
+                    }
                 } else {
                     ActualMessage actualMessage = new ActualMessage(buffer.array());
                     actualMessage.setFrom(invertedSocketMap.get(channel));
+                    if (actualMessage.getType() == ActualMessage.BITFIELD) {
+                        System.out.println("真的收到了bitfield来自:"+actualMessage.getFrom());
+                    }
+                    if (actualMessage.getFrom().equals("1002") && LocalPeer.id.equals("1005")) {
+                        System.out.println("其他消息：类型为"+actualMessage.getType());
+                    }
                     new ActualMessageHandler().handle(actualMessage);
                 }
             }
@@ -101,6 +110,7 @@ public class Server extends Thread {
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+            e.printStackTrace();
         }
     }
 

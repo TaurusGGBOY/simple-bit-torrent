@@ -32,6 +32,8 @@ public class HaveMessageHandler {
         }
 
         // 检查是否结束
-        LocalPeer.checkFinish();
+        if (pieces.size() >= CommonCfg.maxPieceNum) {
+            LocalPeer.checkFinish();
+        }
     }
 }

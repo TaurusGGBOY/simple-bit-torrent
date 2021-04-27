@@ -16,6 +16,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread {
@@ -33,7 +34,7 @@ public class Client extends Thread {
     private BlockingQueue<Message> messageQueue;
 
     private Client() {
-        socketMap = new HashMap<>();
+        socketMap = new ConcurrentHashMap<>();
         messageQueue = new LinkedBlockingQueue<>();
     }
 
@@ -44,33 +45,36 @@ public class Client extends Thread {
         // 消息队列中取数据
         while (true) {
             Message msg = null;
-            try {
-                msg = messageQueue.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                try {
+                    msg = messageQueue.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-            if (msg instanceof ShakeHandMessage) {
-                // 如果是握手消息 则和ShakeHand
-                Socket socket = socketMap.get(((ShakeHandMessage) msg).getTo());
-                try {
-                    OutputStream stream = socket.getOutputStream();
-                    stream.write(msg.toBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (msg instanceof ShakeHandMessage) {
+                    // 如果是握手消息 则和ShakeHand
+                    try {
+                        Socket socket = socketMap.get(((ShakeHandMessage) msg).getTo());
+                        OutputStream stream = socket.getOutputStream();
+                        stream.write(msg.toBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (msg instanceof ActualMessage) {
+                    if (((ActualMessage) msg).getType() == ActualMessage.BITFIELD) {
+                        System.out.println("真的发了bitfield给:" + ((ActualMessage) msg).getTo());
+                    }
+                    try {
+                        Socket socket = socketMap.get(((ActualMessage) msg).getTo());
+                        OutputStream stream = socket.getOutputStream();
+                        stream.write(msg.toBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("这不是现有数据类型，这不可能！");
                 }
-            } else if (msg instanceof ActualMessage) {
-                Socket socket = socketMap.get(((ActualMessage) msg).getTo());
-                try {
-                    OutputStream stream = socket.getOutputStream();
-                    stream.write(msg.toBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("这不是现有数据类型，这不可能！");
             }
-        }
     }
 
     public void shakeHands(String peerID) {
@@ -87,11 +91,11 @@ public class Client extends Thread {
     }
 
     public void sendMessage(Message message) {
-        try {
-            messageQueue.put(message);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            try {
+                messageQueue.put(message);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
     }
 
     public void sendChokeMessage(String peerID) {
@@ -125,8 +129,13 @@ public class Client extends Thread {
         byte[] indexBytes = ByteUtil.intToByteArray(index);
         System.arraycopy(indexBytes, 0, res, 0, 4);
         System.arraycopy(piece, 0, res, 4, piece.length);
+
         msg.setPayload(res);
         msg.cacularAndSetLen();
+
+        // 速率++
+        LocalPeer.peers.get(peerID).increaseRate();
+
         sendMessage(msg);
     }
 
@@ -135,6 +144,14 @@ public class Client extends Thread {
         msg.setPayload(ByteUtil.intToByteArray(index));
         msg.cacularAndSetLen();
         sendMessage(msg);
+
+        // 20s之后 删除这个键
+        new Timer("Request timeout").schedule(new TimerTask() {
+            @Override
+            public void run() {
+                LocalPeer.pieceWaitingMap.remove(index);
+            }
+        }, 20000);
     }
 
     public void sendUnchokeMessage(String peerID) {
@@ -146,7 +163,6 @@ public class Client extends Thread {
 
     public void sendBitFieldMessage(String peerID) {
         ActualMessage msg = new ActualMessage(ActualMessage.BITFIELD, LocalPeer.id, peerID);
-        // TODO 转换成bitfield不对
         char[] chars = new char[(int) Math.ceil(CommonCfg.maxPieceNum * 1.0f / 8) * 8];
         Arrays.fill(chars, '0');
         for (int piece : LocalPeer.localUser.pieces) {
@@ -155,19 +171,15 @@ public class Client extends Thread {
 
         msg.setPayload(ByteUtil.bitStringToByteArr(chars));
         msg.cacularAndSetLen();
+        System.out.println("给peerID发送:" + peerID);
         sendMessage(msg);
     }
 
-    public void register(String id, String hostName, int port) {
+    public void register(String id, String hostName, int port) throws IOException {
         if (socketMap.containsKey(id)) {
             return;
         }
-        Socket socket = null;
-        try {
-            socket = new Socket(hostName, port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Socket socket = new Socket(hostName, port);
         socketMap.put(id, socket);
     }
 }
