@@ -80,8 +80,7 @@ public class Server extends Thread {
         try {
             //得到关联的通道
             channel = (SocketChannel) key.channel();
-            // TODO 会不会太小了
-            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            ByteBuffer buffer = ByteBuffer.allocate(1024 * 33);
             int count = channel.read(buffer);
             if (count > 0) {
                 String msg = new String(buffer.array());

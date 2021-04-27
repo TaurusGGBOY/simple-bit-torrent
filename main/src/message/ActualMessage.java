@@ -1,6 +1,11 @@
 package message;
 
+import util.ByteUtil;
+
+import javax.swing.plaf.metal.MetalBorders;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ActualMessage extends Message {
     private int len;
@@ -27,11 +32,10 @@ public class ActualMessage extends Message {
     }
 
     public ActualMessage(byte[] bytes) {
-        String str = new String(bytes);
-        len = Integer.parseInt(str.substring(0, 4));
-        type = Integer.parseInt(str.substring(4, 5));
+        len = ByteUtil.byteArrayToInt(Arrays.copyOfRange(bytes, 0, 4));
+        type = (int) bytes[4];
         try {
-            payload = Arrays.copyOfRange(bytes, 5, bytes.length);
+            payload = Arrays.copyOfRange(bytes, 5, 5 + len - 1);
         } catch (Exception e) {
             payload = new byte[0];
         }
@@ -48,11 +52,18 @@ public class ActualMessage extends Message {
     }
 
     public byte[] toBytes() {
-        return toString().getBytes();
+        byte[] res = new byte[4 + 1 + (payload == null ? 0 : payload.length)];
+        byte[] lenBytes = ByteUtil.intToByteArray(len);
+
+        System.arraycopy(lenBytes, 0, res, 0, lenBytes.length);
+        res[4] = (byte) type;
+        System.arraycopy(payload, 0, res, lenBytes.length+1, len - 1);
+        String str = new String(res);
+        return res;
     }
 
     public void cacularAndSetLen() {
-        len = 4 + 1 + (payload == null ? 0 : payload.length);
+        len = 1 + (payload == null ? 0 : payload.length);
     }
 
 

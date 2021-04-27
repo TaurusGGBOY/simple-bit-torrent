@@ -62,6 +62,10 @@ public class Logger {
         log("Peer " + localID + " is connected from Peer " + remoteID);
     }
 
+    public static void finish(String localID) {
+        log("Peer " + localID + " check finish");
+    }
+
     public static void changePrefered(String localID, List<String> neighbors) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Peer " + localID + " has the preferred neighbors ");
@@ -87,6 +91,10 @@ public class Logger {
 
     public static void receiveChoke(String localID, String remoteID) {
         log("Peer " + localID + " is choked by " + remoteID);
+    }
+
+    public static void receiveRequest(String localID, String remoteID, int index) {
+        log("Peer " + localID + " received the 'request' message from " + remoteID + " for the piece " + index);
     }
 
     public static void receiveHave(String localID, String remoteID, int index) {

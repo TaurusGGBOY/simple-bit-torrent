@@ -100,3 +100,33 @@
     + 是因为初始化的时候没有给sendto赋值
 
 + 1002向1001发送的是not intersted
+
++ idea compound顺序是错的
+    
+    + 只有用错误的顺序
+    
++ 接到的Bitfield大小为808464435
+
+    + 他是按照bytebuffer分配的大小发送过来的
+    
+    + 解决 按照maxPieceNum来处理bitfield
+    
++ Exception in thread "Thread-0" java.nio.BufferOverflowException
+    
+    + 不能按照payload的长度进行判断！一定要按照msg中的len来截取payload
+    
+    + bits转bytes写错了
+    
++ java.io.FileNotFoundException: .\main\piece\id_1001\piece_21 (系统找不到指定的文件。)
+
+    + 
+    
++ 收到一些piece大小只有4
+
++ request太频繁
+
++ 只收到16个 还差一个
+
+    + 两个字节只能存16个厉害了
+
++ have消息太频繁

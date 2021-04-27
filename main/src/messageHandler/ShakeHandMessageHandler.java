@@ -11,7 +11,7 @@ public class ShakeHandMessageHandler {
     public void handle(ShakeHandMessage msg) {
         // 情况1: 发送方接收到了返回的握手 应该发送bitfiled
         if (LocalPeer.shakingHands.contains(msg.getFrom())) {
-            Logger.isConnection(LocalPeer.id,msg.getFrom());
+            Logger.isConnection(LocalPeer.id, msg.getFrom());
 
             //这个时候才将这个人加入到peers列表中
             LocalPeer.peers.put(msg.getFrom(), PeerInfoCfg.peers.get(msg.getFrom()));
@@ -35,8 +35,8 @@ public class ShakeHandMessageHandler {
         Client.getInstance().sendShakeHandMessage(peer.getID());
 
         // 并握手
-        Logger.makeConnection(LocalPeer.id,msg.getFrom());
-        Logger.isConnection(LocalPeer.id,msg.getFrom());
+        Logger.makeConnection(LocalPeer.id, msg.getFrom());
+        Logger.isConnection(LocalPeer.id, msg.getFrom());
 
         // 并发送bitfield
         Client.getInstance().sendBitFieldMessage(peer.getID());

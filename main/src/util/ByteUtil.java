@@ -1,5 +1,7 @@
 package util;
 
+import java.nio.ByteBuffer;
+
 public class ByteUtil {
     public static String getBit(byte by) {
         StringBuffer sb = new StringBuffer();
@@ -35,44 +37,32 @@ public class ByteUtil {
         return (byte) re;
     }
 
-    public static byte[] bitToBytes(String bit) {
-        StringBuilder stringBuilder = new StringBuilder(bit);
-        int byteLength = (int) Math.ceil(bit.length() * 1.0f / 8);
-        for (int i = 0; i < byteLength * 8 - bit.length(); i++) {
-            stringBuilder.append("0");
-        }
-        byte[] bytes = new byte[byteLength];
-        for (int i = 0; i < byteLength; i++) {
-            bytes[i] = bitToByte(stringBuilder.substring(i * 8, (i + 1) * 8));
-        }
-        return bytes;
-    }
-
     /**
      * int到byte[] 由高位到低位
+     *
      * @param i 需要转换为byte数组的整行值。
      * @return byte数组
      */
     public static byte[] intToByteArray(int i) {
-        byte[] result = new byte[4];
-        result[0] = (byte)((i >> 24) & 0xFF);
-        result[1] = (byte)((i >> 16) & 0xFF);
-        result[2] = (byte)((i >> 8) & 0xFF);
-        result[3] = (byte)(i & 0xFF);
-        return result;
+        return ByteBuffer.allocate(4).putInt(i).array();
     }
 
     /**
-     * byte[]转int
-     * @param bytes 需要转换成int的数组
-     * @return int值
+     * byte数组中取int数值，本方法适用于(低位在后，高位在前)的顺序。和intToBytes2（）配套使用
      */
-    public static int byteArrayToInt(byte[] bytes) {
-        int value=0;
-        for(int i = 0; i < 4; i++) {
-            int shift= (3-i) * 8;
-            value +=(bytes[i] & 0xFF) << shift;
-        }
-        return value;
+    public static int byteArrayToInt(byte[] src) {
+        return ByteBuffer.wrap(src).getInt();
     }
+
+
+    public static byte[] bitStringToByteArr(char[] chars) {
+        byte[] output = new byte[chars.length / 8];
+        for (int i = 0; i < output.length; i++) {
+            for (int b = 0; b <= 7; b++) {
+                output[i] |= (byte) ((chars[i * 8 + b] == '1' ? 1 : 0) << (7 - b));
+            }
+        }
+        return output;
+    }
+
 }

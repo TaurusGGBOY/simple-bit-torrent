@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="localpeerall" type="CompoundRunConfigurationType">
+    <toRun name="LocalPeer1001" type="Application" />
+    <toRun name="LocalPeer1002" type="Application" />
+    <toRun name="LocalPeer1003" type="Application" />
+    <toRun name="LocalPeer155555" type="Application" />
+    <toRun name="LocalPeer10045" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

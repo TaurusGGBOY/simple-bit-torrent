@@ -28,6 +28,7 @@ public class LocalPeer {
             return;
         }
 
+
         // 获取当前的ID
         id = args[0];
 
@@ -87,6 +88,7 @@ public class LocalPeer {
         if (localUser.pieces.size() < CommonCfg.maxPieceNum) {
             return;
         }
+        Logger.finish(localUser.getID());
 
         for (Peer peer : peers.values()) {
             PieceFile.merge("cpabe.rar", CommonCfg.maxPieceNum, peer.getID());

@@ -8,7 +8,6 @@ import peer.LocalPeer;
 import util.ByteUtil;
 import log.Logger;
 
-import javax.management.OperationsException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -95,13 +94,6 @@ public class Client extends Thread {
         }
     }
 
-    public void sendBitfieldMessage(String peerID, String bitfiled) {
-        ActualMessage msg = new ActualMessage(ActualMessage.BITFIELD, LocalPeer.id, peerID);
-        msg.setPayload(ByteUtil.bitToBytes(bitfiled));
-        msg.cacularAndSetLen();
-        sendMessage(msg);
-    }
-
     public void sendChokeMessage(String peerID) {
         ActualMessage msg = new ActualMessage(ActualMessage.CHOKE, LocalPeer.id, peerID);
         msg.cacularAndSetLen();
@@ -129,11 +121,11 @@ public class Client extends Thread {
 
     public void sendPieceMessage(String peerID, int index, byte[] piece) {
         ActualMessage msg = new ActualMessage(ActualMessage.PIECE, LocalPeer.id, peerID);
-        byte[] bytes = new byte[4 + piece.length];
-        byte[] bytes1 = ByteUtil.intToByteArray(index);
-        System.arraycopy(bytes1, 0, bytes, 0, bytes1.length);
-        System.arraycopy(piece, 0, bytes, bytes1.length, piece.length);
-        msg.setPayload(bytes);
+        byte[] res = new byte[4 + piece.length];
+        byte[] indexBytes = ByteUtil.intToByteArray(index);
+        System.arraycopy(indexBytes, 0, res, 0, 4);
+        System.arraycopy(piece, 0, res, 4, piece.length);
+        msg.setPayload(res);
         msg.cacularAndSetLen();
         sendMessage(msg);
     }
@@ -154,13 +146,14 @@ public class Client extends Thread {
 
     public void sendBitFieldMessage(String peerID) {
         ActualMessage msg = new ActualMessage(ActualMessage.BITFIELD, LocalPeer.id, peerID);
-        // TODO
-        char[] chars = new char[CommonCfg.maxPieceNum];
+        // TODO 转换成bitfield不对
+        char[] chars = new char[(int) Math.ceil(CommonCfg.maxPieceNum * 1.0f / 8) * 8];
         Arrays.fill(chars, '0');
         for (int piece : LocalPeer.localUser.pieces) {
             chars[piece] = '1';
         }
-        msg.setPayload(ByteUtil.bitToBytes(String.valueOf(chars)));
+
+        msg.setPayload(ByteUtil.bitStringToByteArr(chars));
         msg.cacularAndSetLen();
         sendMessage(msg);
     }

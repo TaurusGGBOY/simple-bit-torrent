@@ -10,7 +10,6 @@ public class CommonCfg {
 
     private final static String filePath = "./main/Common.cfg";
 
-    // TODO 这个文件名字和文件大小是自己指定的？
     public static int numberOfPreferredNeighbors;
     public static int unchokingInterval;
     public static int optimisticUnchokingInterval;
@@ -41,7 +40,7 @@ public class CommonCfg {
             numberOfPreferredNeighbors = Integer.parseInt(properties.getProperty("NumberOfPreferredNeighbors"));
             unchokingInterval = Integer.parseInt(properties.getProperty("UnchokingInterval"));
             optimisticUnchokingInterval = Integer.parseInt(properties.getProperty("OptimisticUnchokingInterval"));
-            fileName = properties.getProperty("NumberOfPreferredNeighbors");
+            fileName = properties.getProperty("FileName");
             fileSize = Integer.parseInt(properties.getProperty("FileSize"));
             pieceSize = Integer.parseInt(properties.getProperty("PieceSize"));
             maxPieceNum = (int) Math.ceil(fileSize * 1.0f / pieceSize);

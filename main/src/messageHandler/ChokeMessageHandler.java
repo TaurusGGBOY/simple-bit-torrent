@@ -6,8 +6,7 @@ import log.Logger;
 
 public class ChokeMessageHandler {
     public void handle(ActualMessage msg) {
-        // TODO 是否还需要其他操作？
-        // TODO reqeust 的时候是否需要检查choke标志位？
+        // 是否还需要其他操作？ 不需要其他操作 就算发送了request过去 对方也会拒绝 通信就不会继续了
         Logger.receiveChoke(LocalPeer.id, msg.getFrom());
     }
 }

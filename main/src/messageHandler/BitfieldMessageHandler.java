@@ -5,6 +5,7 @@ import io.Client;
 import message.ActualMessage;
 import peer.LocalPeer;
 import log.Logger;
+import util.ByteUtil;
 
 import java.util.Set;
 
@@ -13,11 +14,11 @@ public class BitfieldMessageHandler {
         String from = msg.getFrom();
         Logger.receiveBitfield(LocalPeer.id, from);
 
+        // TODO 收到bitfiled之后 怎么转换成index
+        int bitfieldLen = msg.getLen() - 1;
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < msg.getPayload().length; i++) {
-            for (int j = 7; j >= 0; j--) {
-                sb.append((msg.getPayload()[i] >> j) & 0x1);
-            }
+        for (int i = 0; i < bitfieldLen; i++) {
+            sb.append(ByteUtil.getBit(msg.getPayload()[i]));
         }
 
         // 更新该peer的pieces set

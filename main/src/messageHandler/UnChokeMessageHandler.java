@@ -30,7 +30,8 @@ public class UnChokeMessageHandler {
             return;
         }
 
-        Client.getInstance().sendRequestMessage(msg.getFrom(), list.get(new Random().nextInt(list.size())));
+        int random = new Random().nextInt(list.size());
+        Client.getInstance().sendRequestMessage(msg.getFrom(), list.get(random));
 
     }
 }
