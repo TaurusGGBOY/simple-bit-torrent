@@ -144,8 +144,33 @@
 + 有一些bitfield不知道是没发还是没收到
 
     + 很奇怪 都发送了，但是没有收到
-    + 发现有时候是没有发 也没有接
+    
+    + 发现有时候是没有发 也没有接 x
+    
+    + wireshark抓包发了看一下是不是 x
+    
+    + 原因不明 改成了收到一个bitfield才回复一个bitfield 怀疑粘包
 
 + 没有收完就finish了
 
     + 应该在保存piece之后再结束
+    
++ 有时候会出现空指针异常 Exception in thread "Thread-1" java.lang.NullPointerException
+              	at io.Client.run(Client.java:58)
+    
+    + 是在发送握手消息的时候出现，查看日志之后是在发送握手，接收握手的时候出错，考虑发送的时候没有
+
++ 已经完成了的不应该还收到unchoke
+
+    + 补完interested的逻辑
+
++ request到某一块的时候莫名其妙的卡住 双方都没有交互了
+
+    + 考虑三个 一个是request解析出错 一个是piece发送出错 一个是piece接收出错 
+    + 解决 粘包 在发message的时候加入一个字段表示长度           
+              	
+## 已知问题
+
+## 项目结构              
+
+## 测试方法

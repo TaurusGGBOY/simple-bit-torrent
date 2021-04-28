@@ -7,6 +7,7 @@ import peer.LocalPeer;
 import peer.Peer;
 import log.Logger;
 
+import javax.sound.midi.Soundbank;
 import java.io.IOException;
 
 public class ShakeHandMessageHandler {
@@ -19,6 +20,7 @@ public class ShakeHandMessageHandler {
             LocalPeer.peers.put(msg.getFrom(), PeerInfoCfg.peers.get(msg.getFrom()));
 
             //给他发送bitfield
+            LocalPeer.bitfielding.add(msg.getFrom());
             Client.getInstance().sendBitFieldMessage(msg.getFrom());
 
             // 在队列中删除这个用户
@@ -44,8 +46,5 @@ public class ShakeHandMessageHandler {
         Logger.makeConnection(LocalPeer.id, msg.getFrom());
         Logger.isConnection(LocalPeer.id, msg.getFrom());
 
-        // 并发送bitfield
-        Client.getInstance().sendBitFieldMessage(peer.getID());
-        System.out.println("你是主动给我发的 我给你发bitfield"+peer.getID());
     }
 }

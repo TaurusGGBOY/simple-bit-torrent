@@ -24,8 +24,6 @@ public class PieceMessageHandler {
 
         LocalPeer.localUser.pieces.add(index);
 
-        // 检查是否结束
-        LocalPeer.checkFinish();
 
         //log
         Logger.finishPiece(LocalPeer.id, msg.getFrom(), index, LocalPeer.localUser.pieces.size());
@@ -33,9 +31,23 @@ public class PieceMessageHandler {
             Logger.finishFile(LocalPeer.id);
         }
 
-        // 给所有老哥询问have消息 包括接收方
+        // 给所有老哥发送have消息 包括接收方
         LocalPeer.peers.entrySet().stream()
                 .forEach((entry -> Client.getInstance().sendHaveMessage(entry.getKey(), index)));
+
+        // 检查是否结束
+        LocalPeer.checkFinish();
+
+        // 给不感兴趣的人发不感兴趣
+        LocalPeer.peers.entrySet().stream().filter((entry) -> {
+            // 如果有我感兴趣的就不发，如果没有就发不感兴趣
+            for (int piece : entry.getValue().pieces) {
+                if (!LocalPeer.localUser.pieces.contains(piece)) {
+                    return false;
+                }
+            }
+            return true;
+        }).forEach((entry) -> Client.getInstance().sendNotInterestedMessage(entry.getKey()));
 
         // 如果choke了 就停止发request
         if (LocalPeer.peers.get(msg.getFrom()).isChoke()) {
@@ -51,9 +63,11 @@ public class PieceMessageHandler {
             }
         }
 
+        // 不感兴趣 就停止发request
         if (list.size() <= 0) {
             return;
         }
+
 
         int random = new Random().nextInt(list.size());
         Client.getInstance().sendRequestMessage(msg.getFrom(), list.get(random));

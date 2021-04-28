@@ -5,6 +5,7 @@ import message.ShakeHandMessage;
 import messageHandler.ActualMessageHandler;
 import messageHandler.ShakeHandMessageHandler;
 import peer.LocalPeer;
+import util.ByteUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -80,26 +81,24 @@ public class Server extends Thread {
         try {
             //得到关联的通道
             channel = (SocketChannel) key.channel();
-            ByteBuffer buffer = ByteBuffer.allocate(1024 * 34);
+
+            // 先读4个字节
+            ByteBuffer buffer = ByteBuffer.allocate(4);
             int count = channel.read(buffer);
             if (count > 0) {
+                // 此处有粘包问题 已解决
+                int len = ByteUtil.byteArrayToInt(buffer.array());
+                // 再读len个字节
+                buffer = ByteBuffer.allocate(len);
+                channel.read(buffer);
                 String msg = new String(buffer.array());
                 if (msg.startsWith(ShakeHandMessage.header)) {
                     ShakeHandMessage shakeHandMessage = new ShakeHandMessage(buffer.array());
                     register(channel, shakeHandMessage.getFrom());
                     new ShakeHandMessageHandler().handle(shakeHandMessage);
-                    if (shakeHandMessage.getFrom().equals("1002") && LocalPeer.id.equals("1005")) {
-                        System.out.println("握手了");
-                    }
                 } else {
                     ActualMessage actualMessage = new ActualMessage(buffer.array());
                     actualMessage.setFrom(invertedSocketMap.get(channel));
-                    if (actualMessage.getType() == ActualMessage.BITFIELD) {
-                        System.out.println("真的收到了bitfield来自:"+actualMessage.getFrom());
-                    }
-                    if (actualMessage.getFrom().equals("1002") && LocalPeer.id.equals("1005")) {
-                        System.out.println("其他消息：类型为"+actualMessage.getType());
-                    }
                     new ActualMessageHandler().handle(actualMessage);
                 }
             }

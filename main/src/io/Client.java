@@ -45,36 +45,34 @@ public class Client extends Thread {
         // 消息队列中取数据
         while (true) {
             Message msg = null;
-                try {
-                    msg = messageQueue.take();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                if (msg instanceof ShakeHandMessage) {
-                    // 如果是握手消息 则和ShakeHand
-                    try {
-                        Socket socket = socketMap.get(((ShakeHandMessage) msg).getTo());
-                        OutputStream stream = socket.getOutputStream();
-                        stream.write(msg.toBytes());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else if (msg instanceof ActualMessage) {
-                    if (((ActualMessage) msg).getType() == ActualMessage.BITFIELD) {
-                        System.out.println("真的发了bitfield给:" + ((ActualMessage) msg).getTo());
-                    }
-                    try {
-                        Socket socket = socketMap.get(((ActualMessage) msg).getTo());
-                        OutputStream stream = socket.getOutputStream();
-                        stream.write(msg.toBytes());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    System.out.println("这不是现有数据类型，这不可能！");
-                }
+            try {
+                msg = messageQueue.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
+            try {
+                Socket socket = socketMap.get(msg.getTo());
+                OutputStream stream = socket.getOutputStream();
+                stream.write(ByteUtil.concat(ByteUtil.intToByteArray(msg.getMessageLen()), msg.toBytes()));
+            } catch (Exception e) {
+                // 如果失败 十秒后重试一次
+                e.printStackTrace();
+                Message finalMsg = msg;
+                new Timer("send fail").schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            Socket socket = socketMap.get(finalMsg.getTo());
+                            OutputStream stream = socket.getOutputStream();
+                            stream.write(ByteUtil.concat(ByteUtil.intToByteArray(finalMsg.getMessageLen()), finalMsg.toBytes()));
+                        } catch (IOException ioException) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, 10000);
+            }
+        }
     }
 
     public void shakeHands(String peerID) {
@@ -91,35 +89,32 @@ public class Client extends Thread {
     }
 
     public void sendMessage(Message message) {
-            try {
-                messageQueue.put(message);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        message.cacularAndSetLen();
+        try {
+            messageQueue.put(message);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendChokeMessage(String peerID) {
         ActualMessage msg = new ActualMessage(ActualMessage.CHOKE, LocalPeer.id, peerID);
-        msg.cacularAndSetLen();
         sendMessage(msg);
     }
 
     public void sendHaveMessage(String peerID, int index) {
         ActualMessage msg = new ActualMessage(ActualMessage.HAVE, LocalPeer.id, peerID);
         msg.setPayload(ByteUtil.intToByteArray(index));
-        msg.cacularAndSetLen();
         sendMessage(msg);
     }
 
     public void sendInterestedMessage(String peerID) {
         ActualMessage msg = new ActualMessage(ActualMessage.INTERESTED, LocalPeer.id, peerID);
-        msg.cacularAndSetLen();
         sendMessage(msg);
     }
 
     public void sendNotInterestedMessage(String peerID) {
         ActualMessage msg = new ActualMessage(ActualMessage.NOTINTERESTED, LocalPeer.id, peerID);
-        msg.cacularAndSetLen();
         sendMessage(msg);
     }
 
@@ -131,7 +126,6 @@ public class Client extends Thread {
         System.arraycopy(piece, 0, res, 4, piece.length);
 
         msg.setPayload(res);
-        msg.cacularAndSetLen();
 
         // 速率++
         LocalPeer.peers.get(peerID).increaseRate();
@@ -142,7 +136,6 @@ public class Client extends Thread {
     public void sendRequestMessage(String peerID, int index) {
         ActualMessage msg = new ActualMessage(ActualMessage.REQUEST, LocalPeer.id, peerID);
         msg.setPayload(ByteUtil.intToByteArray(index));
-        msg.cacularAndSetLen();
         sendMessage(msg);
 
         // 20s之后 删除这个键
@@ -156,7 +149,6 @@ public class Client extends Thread {
 
     public void sendUnchokeMessage(String peerID) {
         ActualMessage msg = new ActualMessage(ActualMessage.UNCHOKE, LocalPeer.id, peerID);
-        msg.cacularAndSetLen();
         sendMessage(msg);
     }
 
@@ -170,8 +162,6 @@ public class Client extends Thread {
         }
 
         msg.setPayload(ByteUtil.bitStringToByteArr(chars));
-        msg.cacularAndSetLen();
-        System.out.println("给peerID发送:" + peerID);
         sendMessage(msg);
     }
 

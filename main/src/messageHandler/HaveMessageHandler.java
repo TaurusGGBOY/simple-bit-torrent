@@ -26,9 +26,11 @@ public class HaveMessageHandler {
             Logger.finishFile(msg.getFrom());
         }
 
-        // 如果有感兴趣的就发送感兴趣
+        // 如果有感兴趣的就发送感兴趣 不然就不感兴趣
         if (!LocalPeer.localUser.pieces.contains(index)) {
             Client.getInstance().sendInterestedMessage(msg.getFrom());
+        }else{
+            Client.getInstance().sendNotInterestedMessage(msg.getFrom());
         }
 
         // 检查是否结束

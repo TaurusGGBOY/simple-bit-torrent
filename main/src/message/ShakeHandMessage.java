@@ -4,9 +4,6 @@ public class ShakeHandMessage extends Message {
     public static final String header = "P2PFILESHARINGPROJ";
     public static final String zeroBits = "0000000000";
 
-    private String from;
-    private String to;
-
     public ShakeHandMessage() {
     }
 
@@ -24,12 +21,22 @@ public class ShakeHandMessage extends Message {
         return toString().getBytes();
     }
 
+    @Override
+    public int getMessageLen() {
+        return messageLen;
+    }
+
     public String getFrom() {
         return from;
     }
 
     public void setFrom(String from) {
         this.from = from;
+    }
+
+    @Override
+    public void cacularAndSetLen() {
+        messageLen = 32;
     }
 
     public String getTo() {

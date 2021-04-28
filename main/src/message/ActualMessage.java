@@ -2,10 +2,7 @@ package message;
 
 import util.ByteUtil;
 
-import javax.swing.plaf.metal.MetalBorders;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class ActualMessage extends Message {
     private int len;
@@ -57,13 +54,20 @@ public class ActualMessage extends Message {
 
         System.arraycopy(lenBytes, 0, res, 0, lenBytes.length);
         res[4] = (byte) type;
-        System.arraycopy(payload, 0, res, lenBytes.length+1, len - 1);
+        System.arraycopy(payload, 0, res, lenBytes.length + 1, len - 1);
         String str = new String(res);
         return res;
     }
 
+    @Override
+    public int getMessageLen() {
+        return messageLen;
+    }
+
     public void cacularAndSetLen() {
         len = 1 + (payload == null ? 0 : payload.length);
+        // 包括len
+        messageLen = len + 4;
     }
 
 

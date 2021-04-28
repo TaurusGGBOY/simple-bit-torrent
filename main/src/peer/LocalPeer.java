@@ -17,6 +17,7 @@ public class LocalPeer {
     public static Peer localUser;
     public static Map<Integer, String> pieceWaitingMap = new HashMap<>();
     public static Set<String> shakingHands = new HashSet<>();
+    public static Set<String> bitfielding = new HashSet<>();
 
     public static void main(String[] args) throws IOException {
         // 读取配置文件
@@ -83,6 +84,8 @@ public class LocalPeer {
                     public void run() {
                         try {
                             client.register(peer.getKey(), peer.getValue().getHostName(), peer.getValue().getPort());
+                            // 发送握手信息
+                            client.shakeHands(peer.getKey());
                         } catch (IOException ioException) {
                         }
                     }

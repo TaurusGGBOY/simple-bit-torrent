@@ -104,8 +104,9 @@ public class NeighborSelector extends Thread {
                 List<Map.Entry<String, Peer>> chokeList;
                 Map.Entry<String, Peer> optPeer;
                 try {
+                    // choke并且对我感兴趣
                     chokeList = LocalPeer.peers.entrySet().stream().filter((entry) -> {
-                        return entry.getValue().isChoke();
+                        return entry.getValue().isChoke() && entry.getValue().isInterstedInLocal();
                     }).collect(Collectors.toList());
                     Random random = new Random();
                     optPeer = chokeList.get(random.nextInt(chokeList.size()));

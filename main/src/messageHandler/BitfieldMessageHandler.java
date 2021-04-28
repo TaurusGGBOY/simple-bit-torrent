@@ -11,10 +11,15 @@ import java.util.Set;
 
 public class BitfieldMessageHandler {
     public void handle(ActualMessage msg) {
-        System.out.println("来自peerID的bitfield:"+msg.getFrom());
-
         String from = msg.getFrom();
         Logger.receiveBitfield(LocalPeer.id, from);
+
+        // 如果没给老哥 发过bitfield就发一下
+        if (LocalPeer.bitfielding.contains(from)) {
+            LocalPeer.bitfielding.remove(from);
+        }else{
+            Client.getInstance().sendBitFieldMessage(from);
+        }
 
         int bitfieldLen = msg.getLen() - 1;
         StringBuffer sb = new StringBuffer();
