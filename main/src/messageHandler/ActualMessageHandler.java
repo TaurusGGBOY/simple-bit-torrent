@@ -3,6 +3,10 @@ package messageHandler;
 import message.ActualMessage;
 
 public class ActualMessageHandler {
+    /**
+     *
+     * @param msg
+     */
     public void handle(ActualMessage msg) {
         switch (msg.getType()) {
             case ActualMessage.CHOKE: {

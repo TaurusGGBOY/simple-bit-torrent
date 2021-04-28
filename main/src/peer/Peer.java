@@ -9,11 +9,18 @@ public class Peer {
     private int port;
     private boolean hasFileOrNot;
 
+    // 下载速率 单位为一个piece
     private int rate;
+    // 是否可以向本地用户请求piece 处理request消息和piece消息用
     private boolean choke;
+    // 该peer的piece集合
     public Set<Integer> pieces;
+    // 是否对本地用户感兴趣 选举时候用
     private boolean interstedInLocal;
 
+    /**
+     *
+     */
     public Peer() {
         pieces = new HashSet<>();
         choke = true;
@@ -54,10 +61,6 @@ public class Peer {
 
     public int getRate() {
         return rate;
-    }
-
-    public void setRate(int rate) {
-        this.rate = rate;
     }
 
     public void increaseRate() {

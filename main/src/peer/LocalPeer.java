@@ -29,24 +29,17 @@ public class LocalPeer {
             return;
         }
 
-
         // 获取当前的ID
         id = args[0];
-
         // 获取自己
         localUser = PeerInfoCfg.peers.get(id);
-
         // 初始化设置logger id
         Logger.id = id;
 
         // 删除文件夹
         PieceFile.removeDirById(id);
-
         // 创建Logger文件夹
-        Logger.createLogFile();
-
-        // 初始化等待队列
-        pieceWaitingMap = new HashMap<>();
+        Logger.createLogFileByID(id);
 
         // 如果有完整文件就将所有分片加入到自己的集合
         if (localUser.isHasFileOrNot()) {
@@ -65,7 +58,7 @@ public class LocalPeer {
         Client client = Client.getInstance();
         client.start();
 
-        //将配置文件信息写入到local用户，用来添加新连接
+        // 将配置文件信息写入到local用户，用来添加新连接
         LinkedHashMap<String, Peer> allPeers = PeerInfoCfg.peers;
         Iterator<Map.Entry<String, Peer>> iterator = allPeers.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -99,6 +92,9 @@ public class LocalPeer {
         neighborSelector.start();
     }
 
+    /**
+     * 检查是否结束，如果结束则退出
+     */
     public static void checkFinish() {
         for (Peer peer : peers.values()) {
             if (peer.pieces.size() < CommonCfg.maxPieceNum) {
@@ -110,7 +106,7 @@ public class LocalPeer {
         }
         Logger.finish(localUser.getID());
 
-        PieceFile.merge("cpabe.rar", CommonCfg.maxPieceNum, localUser.getID());
+        PieceFile.merge(CommonCfg.fileName, CommonCfg.maxPieceNum, localUser.getID());
         System.exit(0);
     }
 

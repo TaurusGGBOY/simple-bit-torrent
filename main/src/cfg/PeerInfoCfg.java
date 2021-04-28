@@ -6,16 +6,23 @@ import java.io.*;
 import java.util.LinkedHashMap;
 
 public class PeerInfoCfg {
-
     private final static String filePath = "./main/PeerInfo.cfg";
 
     public static LinkedHashMap<String, Peer> peers = new LinkedHashMap<>();
 
-
+    /**
+     * 默认从filePath读取PeerInfo
+     * @throws IOException
+     */
     public static void read() throws IOException {
         read(filePath);
     }
 
+    /**
+     * 从Path读取PeerInfo
+     * @param Path
+     * @throws IOException
+     */
     public static void read(String Path) throws IOException {
         File file = new File(Path);
         BufferedReader fileReader = new BufferedReader(new FileReader(file));

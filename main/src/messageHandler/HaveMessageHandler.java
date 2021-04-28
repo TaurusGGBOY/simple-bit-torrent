@@ -10,6 +10,10 @@ import log.Logger;
 import java.util.Set;
 
 public class HaveMessageHandler {
+    /**
+     *
+     * @param msg
+     */
     public void handle(ActualMessage msg) {
         int index = ByteUtil.byteArrayToInt(msg.getPayload());
 

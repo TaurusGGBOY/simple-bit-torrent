@@ -19,10 +19,20 @@ public class CommonCfg {
 
     public static int maxPieceNum;
 
+    /**
+     * 默认从filePath读取 CommonCfg
+     * @throws IOException
+     */
     public static void read() throws IOException {
         read(filePath);
     }
 
+    /**
+     * 从Path读取配置CommonCfg
+     * @param Path
+     * @throws IOException
+     *
+     */
     public static void read(String Path) throws IOException {
         File file = new File(Path);
         BufferedReader fileReader = new BufferedReader(new FileReader(file));

@@ -10,17 +10,22 @@ import util.ByteUtil;
 import java.util.Set;
 
 public class BitfieldMessageHandler {
+    /**
+     *
+     * @param msg
+     */
     public void handle(ActualMessage msg) {
         String from = msg.getFrom();
         Logger.receiveBitfield(LocalPeer.id, from);
 
-        // 如果没给老哥 发过bitfield就发一下
+        // 如果没给远方发过bitfield就发送该消息 否则就删除等待队列中的值
         if (LocalPeer.bitfielding.contains(from)) {
             LocalPeer.bitfielding.remove(from);
         }else{
             Client.getInstance().sendBitFieldMessage(from);
         }
 
+        // 将bitfileld读出
         int bitfieldLen = msg.getLen() - 1;
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < bitfieldLen; i++) {
@@ -36,7 +41,7 @@ public class BitfieldMessageHandler {
             }
         }
 
-        // 如果该peer都有了 log
+        // 如果该peer拥有完整文件 了就log
         if (pieces.size() >= CommonCfg.maxPieceNum) {
             Logger.finishFile(msg.getFrom());
         }

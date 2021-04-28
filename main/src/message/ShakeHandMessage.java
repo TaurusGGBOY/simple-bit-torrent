@@ -4,19 +4,34 @@ public class ShakeHandMessage extends Message {
     public static final String header = "P2PFILESHARINGPROJ";
     public static final String zeroBits = "0000000000";
 
+    /**
+     *
+     */
     public ShakeHandMessage() {
     }
 
+    /**
+     *
+     * @param bytes
+     */
     public ShakeHandMessage(byte[] bytes) {
         String str = new String(bytes);
         from = str.substring(28,32);
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public String toString() {
         return header + zeroBits + String.valueOf(from);
     }
 
+    /**
+     *
+     * @return
+     */
     public byte[] toBytes() {
         return toString().getBytes();
     }

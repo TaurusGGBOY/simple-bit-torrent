@@ -12,26 +12,27 @@ import log.Logger;
 import java.util.*;
 
 public class PieceMessageHandler {
+    /**
+     *
+     * @param msg
+     */
     public void handle(ActualMessage msg) {
         byte[] payload = msg.getPayload();
         int index = ByteUtil.byteArrayToInt(Arrays.copyOfRange(payload, 0, 4));
-
         // 等待队列中去掉
         LocalPeer.pieceWaitingMap.remove(index);
-
         // 保存piece
         PieceFile.savePiece(index, LocalPeer.id, Arrays.copyOfRange(payload, 4, msg.getLen() - 1));
-
+        // 更新起piece信息
         LocalPeer.localUser.pieces.add(index);
-
-
         //log
         Logger.finishPiece(LocalPeer.id, msg.getFrom(), index, LocalPeer.localUser.pieces.size());
+        // 检查其是否完成一个文件读取
         if (LocalPeer.localUser.pieces.size() >= CommonCfg.maxPieceNum) {
             Logger.finishFile(LocalPeer.id);
         }
 
-        // 给所有老哥发送have消息 包括接收方
+        // 给所有Peer发送have消息 包括接收方
         LocalPeer.peers.entrySet().stream()
                 .forEach((entry -> Client.getInstance().sendHaveMessage(entry.getKey(), index)));
 
@@ -49,26 +50,23 @@ public class PieceMessageHandler {
             return true;
         }).forEach((entry) -> Client.getInstance().sendNotInterestedMessage(entry.getKey()));
 
-        // 如果choke了 就停止发request
+        // 如果对该peer choke了 就停止发request
         if (LocalPeer.peers.get(msg.getFrom()).isChoke()) {
             return;
         }
 
         // 遍历看还对远方感兴趣否
         List<Integer> list = new ArrayList<>();
-
         for (int piece : LocalPeer.peers.get(msg.getFrom()).pieces) {
             if (!LocalPeer.localUser.pieces.contains(piece) && !LocalPeer.pieceWaitingMap.containsKey(piece)) {
                 list.add(piece);
             }
         }
-
         // 不感兴趣 就停止发request
         if (list.size() <= 0) {
             return;
         }
-
-
+        // 否则随机选择一个piece请求
         int random = new Random().nextInt(list.size());
         Client.getInstance().sendRequestMessage(msg.getFrom(), list.get(random));
     }

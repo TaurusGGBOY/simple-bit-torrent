@@ -21,6 +21,12 @@ public class ActualMessage extends Message {
     public static final int REQUEST = 6;
     public static final int PIECE = 7;
 
+    /**
+     * 构造ActualMessage的时候用
+     * @param type
+     * @param from
+     * @param to
+     */
     public ActualMessage(int type, String from, String to) {
         this.type = type;
         this.from = from;
@@ -28,6 +34,10 @@ public class ActualMessage extends Message {
         this.payload = new byte[0];
     }
 
+    /**
+     * 重建ActualMessage的时候用
+     * @param bytes
+     */
     public ActualMessage(byte[] bytes) {
         len = ByteUtil.byteArrayToInt(Arrays.copyOfRange(bytes, 0, 4));
         type = (int) bytes[4];
@@ -38,6 +48,10 @@ public class ActualMessage extends Message {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -48,6 +62,10 @@ public class ActualMessage extends Message {
         return stringBuilder.toString();
     }
 
+    /**
+     * 返回字节流，不包括messageLength
+     * @return
+     */
     public byte[] toBytes() {
         byte[] res = new byte[4 + 1 + (payload == null ? 0 : payload.length)];
         byte[] lenBytes = ByteUtil.intToByteArray(len);
@@ -59,17 +77,18 @@ public class ActualMessage extends Message {
         return res;
     }
 
-    @Override
-    public int getMessageLen() {
-        return messageLen;
-    }
-
+    /**
+     * 计算报文中的len和messageLen
+     */
     public void cacularAndSetLen() {
         len = 1 + (payload == null ? 0 : payload.length);
         // 包括len
         messageLen = len + 4;
     }
 
+    public int getMessageLen() {
+        return messageLen;
+    }
 
     public int getLen() {
         return len;

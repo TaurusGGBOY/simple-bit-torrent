@@ -8,7 +8,12 @@ import java.nio.channels.FileChannel;
 
 public class PieceFile {
 
-    // 保存piece
+    /**
+     * 按照index和id读取piece
+     * @param index
+     * @param id
+     * @return
+     */
     public static byte[] readPiece(int index, String id) {
         String currentDir = "./main/piece/id_" + id + File.separator + "piece_" + index;
         File file = new File(currentDir);
@@ -32,7 +37,12 @@ public class PieceFile {
         return new byte[0];
     }
 
-    // 保存piece
+    /**
+     * 按照index，id存储piece
+     * @param index
+     * @param id
+     * @param bytes
+     */
     public static void savePiece(int index, String id, byte[] bytes) {
         // 创建文件夹
         String dir = "./main/piece/id_" + id;
@@ -65,41 +75,48 @@ public class PieceFile {
         }
     }
 
-    // 文件分片
-    public static void spilt(String filePath, int splitNum, double subSize, String id) {
+    /**
+     * 如果有完整文件，将filePath的文件，则按照id,分割maxPieceNum个最大大小为pieceSize的文件，存在currentDir中
+     * @param filePath
+     * @param maxPieceNum
+     * @param pieceSize
+     * @param id
+     */
+    public static void spilt(String filePath, int maxPieceNum, double pieceSize, String id) {
         String currentDir = "./main/piece/id_" + id;
         File dir = new File(currentDir);
         if (!dir.exists()) {
             dir.mkdirs();
         }
         try {
-            nioSpilt(new File(filePath), splitNum, currentDir, CommonCfg.pieceSize);
+            nioSpilt(new File(filePath), maxPieceNum, currentDir, pieceSize);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // 合并
-    public static void merge(String afterName, int pieceCount, String id) {
-        String piecePath = "./main/piece/id_" + id;
-        mergeFile(afterName, piecePath, pieceCount);
-    }
 
-
-    //splitNum:要分几片，currentDir：分片后存放的位置，subSize：按多大分片
-    public static void nioSpilt(File file, int splitNum, String currentDir, double subSize) throws Exception {
+    /**
+     * 如果有完整文件，将文件file，分割maxPieceNum个最大大小为pieceSize的文件，存在currentDir中
+     * @param file
+     * @param maxPieceNum 要分几片
+     * @param currentDir 分片后存放的位置
+     * @param pieceSize 按多大分片
+     * @throws Exception
+     */
+    public static void nioSpilt(File file, int maxPieceNum, String currentDir, double pieceSize) throws Exception {
         FileInputStream fis = new FileInputStream(file);
         FileChannel inputChannel = fis.getChannel();
         FileOutputStream fos;
         FileChannel outputChannel;
-        long splitSize = (long) subSize;
+        long splitSize = (long) pieceSize;
         long startPoint = 0;
         long endPoint = splitSize;
         File pieceDir = new File(currentDir);
         if (!pieceDir.exists()) {
             pieceDir.mkdir();
         }
-        for (int i = 0; i < splitNum; i++) {
+        for (int i = 0; i < maxPieceNum; i++) {
             fos = new FileOutputStream(currentDir + File.separator + "piece_" + i);
             outputChannel = fos.getChannel();
             inputChannel.transferTo(startPoint, splitSize, outputChannel);
@@ -113,8 +130,20 @@ public class PieceFile {
     }
 
     /**
-     * 文件合并
-     *
+     * 输入id，将文件合成为之前的文件
+     * @param afterName
+     * @param pieceCount
+     * @param id
+     */
+    public static void merge(String afterName, int pieceCount, String id) {
+        String piecePath = "./main/piece/id_" + id;
+        mergeFile(afterName, piecePath, pieceCount);
+    }
+
+
+
+    /**
+     * 输入分割的文件地址，存在piecePath下的afterName中
      * @param afterName  指定合并文件
      * @param piecePath  分割前的文件名
      * @param pieceCount 文件个数
@@ -146,6 +175,10 @@ public class PieceFile {
         }
     }
 
+    /**
+     * 按照ID，删除对应的piece文件夹
+     * @param id
+     */
     public static void removeDirById(String id) {
         String path = "./main/piece/id_" + id;
         File f = new File(path);
@@ -158,8 +191,11 @@ public class PieceFile {
         f.delete();
     }
 
+    /**
+     * 删除path所在的文件夹
+     * @param path
+     */
     public static void removeDir(String path) {
-
         File f = new File(path);
         if (f.isDirectory()) {//如果是目录，先递归删除
             String[] list = f.list();

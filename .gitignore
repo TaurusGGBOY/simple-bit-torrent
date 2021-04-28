@@ -23,3 +23,8 @@
 hs_err_pid*
 
 main/piece
+
+# idea
+.idea
+*.iml
+out

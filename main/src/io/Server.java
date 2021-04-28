@@ -17,10 +17,13 @@ import java.util.Map;
 
 public class Server extends Thread {
     private static Server server = new Server();
-    private ServerSocketChannel listenerChannel; //监听通道
-    private Selector selector;//选择器对象
-    private static int PORT; //服务器端口
-
+    //监听通道
+    private ServerSocketChannel listenerChannel;
+    //选择器对象
+    private Selector selector;
+    //服务器端口
+    private static int PORT;
+    // 倒排表，用channel来定位是谁的消息
     Map<SocketChannel, String> invertedSocketMap;
 
     private Server() {
@@ -42,6 +45,11 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * 单例模式
+     *
+     * @return
+     */
     public static Server getInstance() {
         return server;
     }
@@ -49,7 +57,7 @@ public class Server extends Thread {
     @Override
     public void run() {
         try {
-            while (true) { //不停监控
+            while (true) {
                 if (selector.select(1000) == 0) {
                     //此处可编写服务器空闲时的业务代码
                     continue;
@@ -57,10 +65,12 @@ public class Server extends Thread {
                 Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                 while (iterator.hasNext()) {
                     SelectionKey key = iterator.next();
-                    if (key.isAcceptable()) { //连接请求事件
+                    //连接请求事件
+                    if (key.isAcceptable()) {
                         createConnection();
                     }
-                    if (key.isReadable()) { //读取数据事件
+                    //读取数据事件
+                    if (key.isReadable()) {
                         readMessage(key);
                     }
                     //一定要把当前key删掉，防止重复处理
@@ -72,16 +82,26 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * 将channel放入倒排表
+     *
+     * @param sc
+     * @param id
+     */
     public void register(SocketChannel sc, String id) {
         invertedSocketMap.put(sc, id);
     }
 
+    /**
+     * 读key中的信息
+     *
+     * @param key
+     */
     private void readMessage(SelectionKey key) {
         SocketChannel channel = null;
         try {
             //得到关联的通道
             channel = (SocketChannel) key.channel();
-
             // 先读4个字节
             ByteBuffer buffer = ByteBuffer.allocate(4);
             int count = channel.read(buffer);
@@ -113,14 +133,16 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * 创建nio连接
+     */
     private void createConnection() {
         try {
             SocketChannel sc = listenerChannel.accept();
             sc.configureBlocking(false);
             sc.register(selector, SelectionKey.OP_READ);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-
-
 }

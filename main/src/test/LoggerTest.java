@@ -11,7 +11,7 @@ public class LoggerTest {
         String str = "testString";
         String id = "1001";
         Logger.id = id;
-        Logger.createLogFile();
+        Logger.createLogFileByID(id);
         Logger.log(str);
         Logger.log(str);
         Logger.log(str);
@@ -22,7 +22,7 @@ public class LoggerTest {
         String str = "testString";
         String id = "1002";
         Logger.id = id;
-        Logger.createLogFile();
+        Logger.createLogFileByID(id);
         Logger.log(str);
     }
 
@@ -38,7 +38,7 @@ public class LoggerTest {
         list.add("1003");
 
         Logger.id = localID;
-        Logger.createLogFile();
+        Logger.createLogFileByID(localID);
 
         Logger.changeOpt(localID, remoteID);
         Logger.finishFile(remoteID);

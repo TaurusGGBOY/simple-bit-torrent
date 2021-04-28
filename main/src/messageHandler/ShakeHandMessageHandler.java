@@ -6,11 +6,13 @@ import message.ShakeHandMessage;
 import peer.LocalPeer;
 import peer.Peer;
 import log.Logger;
-
-import javax.sound.midi.Soundbank;
 import java.io.IOException;
 
 public class ShakeHandMessageHandler {
+    /**
+     *
+     * @param msg
+     */
     public void handle(ShakeHandMessage msg) {
         // 情况1: 发送方接收到了返回的握手 应该发送bitfiled
         if (LocalPeer.shakingHands.contains(msg.getFrom())) {
@@ -39,12 +41,11 @@ public class ShakeHandMessageHandler {
             e.printStackTrace();
         }
 
-        // 并发送握手
+        // 发送握手
         Client.getInstance().sendShakeHandMessage(peer.getID());
 
-        // 并握手
+        // 记录握手
         Logger.makeConnection(LocalPeer.id, msg.getFrom());
         Logger.isConnection(LocalPeer.id, msg.getFrom());
-
     }
 }

@@ -5,7 +5,7 @@ public abstract class Message {
 
     protected String from;
     protected String to;
-    // messageLen以后的长度
+    // messageLen以后内容的长度
     protected int messageLen;
 
     public abstract int getMessageLen();
