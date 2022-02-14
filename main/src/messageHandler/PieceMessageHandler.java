@@ -28,9 +28,7 @@ public class PieceMessageHandler {
         //log
         Logger.finishPiece(LocalPeer.id, msg.getFrom(), index, LocalPeer.localUser.pieces.size());
         // 检查其是否完成一个文件读取
-        if (LocalPeer.localUser.pieces.size() >= CommonCfg.maxPieceNum) {
-            Logger.finishFile(LocalPeer.id);
-        }
+        if (LocalPeer.localUser.pieces.size() >= CommonCfg.maxPieceNum) Logger.finishFile(LocalPeer.id);
 
         // 给所有Peer发送have消息 包括接收方
         LocalPeer.peers.entrySet().stream()
@@ -51,9 +49,7 @@ public class PieceMessageHandler {
         }).forEach((entry) -> Client.getInstance().sendNotInterestedMessage(entry.getKey()));
 
         // 如果对该peer choke了 就停止发request
-        if (LocalPeer.peers.get(msg.getFrom()).isChoke()) {
-            return;
-        }
+        if (LocalPeer.peers.get(msg.getFrom()).isChoke()) return;
 
         // 遍历看还对远方感兴趣否
         List<Integer> list = new ArrayList<>();

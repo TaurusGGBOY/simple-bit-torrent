@@ -18,9 +18,7 @@ public class RequestMessageHandler {
         Logger.receiveRequest(LocalPeer.id, msg.getFrom(), index);
 
         // 如果选举后远方peer成为choke 那就不发送了
-        if (LocalPeer.peers.get(msg.getFrom()).isChoke()) {
-            return;
-        }
+        if (LocalPeer.peers.get(msg.getFrom()).isChoke()) return;
 
         // 读取piece
         byte[] piece = PieceFile.readPiece(index, LocalPeer.id);

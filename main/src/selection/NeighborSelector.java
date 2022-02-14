@@ -38,30 +38,20 @@ public class NeighborSelector extends Thread {
         @Override
         public void run() {
             synchronized (LocalPeer.class) {
-                // 如果所有名单为空 就不选举
-                if (LocalPeer.peers.size() <= 0) {
-                    return;
-                }
+                // 如果所有邻居的名单为空 就不选举
+                if (LocalPeer.peers.size() <= 0) return;
 
-                // 用一个大顶堆来选择
-                Queue<AbstractMap.SimpleEntry<String, Integer>> topKRate = new PriorityQueue<>(new Comparator<AbstractMap.SimpleEntry<String, Integer>>() {
-                    @Override
-                    public int compare(AbstractMap.SimpleEntry<String, Integer> o1, AbstractMap.SimpleEntry<String, Integer> o2) {
-                        int temp = o2.getValue() - o1.getValue();
-                        if (temp == 0) {
-                            // 如果相同则随机选择
-                            return new Random().nextInt(2) == 0 ? 1 : -1;
-                        }
-                        return temp;
-                    }
+                // 用一个大顶堆来选择偏向邻居，值为网速
+                Queue<AbstractMap.SimpleEntry<String, Integer>> topKRate = new PriorityQueue<>((o1, o2) -> {
+                    if (o2.getValue() - o1.getValue() != 0) return o2.getValue() - o1.getValue();
+                    // 如果相同则随机排序
+                    return new Random().nextInt(2) == 0 ? 1 : -1;
                 });
 
                 // 如果没有就返回
-                if (topKRate.size() <= 0) {
-                    return;
-                }
+                if (topKRate.size() <= 0) return;
 
-                // 将对自己感兴趣的Topk加入
+                // 将对自己感兴趣的邻居加入大顶堆
                 LocalPeer.peers.entrySet().stream().filter((entry) ->
                         entry.getValue().isInterstedInLocal()
                 ).forEach((entry) -> {
@@ -72,16 +62,14 @@ public class NeighborSelector extends Thread {
                 // 将之前的PreferNeighbor清空
                 preferedNeighbors.clear();
 
-                // 加入大顶堆
+                // 选出新的偏向邻居
                 topKRate.stream().limit(numberOfPreferredNeighbors).forEach((entry) -> {
                     preferedNeighbors.add(entry.getKey());
                 });
 
-                // 将大顶堆加入到列表中
+                // log
                 List<String> list = new ArrayList<>(preferedNeighbors);
                 list.sort(null);
-
-                // log
                 Logger.changePrefered(LocalPeer.id, list);
 
                 // 检查preferedNeighbors里面原来是choke的，发送unchoke消息
@@ -106,29 +94,26 @@ public class NeighborSelector extends Thread {
         public void run() {
             synchronized (LocalPeer.class) {
                 // 如果所有名单为空 就不选举
-                if (LocalPeer.peers.size() <= 0) {
-                    return;
-                }
+                if (LocalPeer.peers.size() <= 0) return;
 
                 // 如果失败就返回
                 List<Map.Entry<String, Peer>> chokeList;
                 Map.Entry<String, Peer> optPeer;
                 try {
-                    // choke并且对我感兴趣
-                    chokeList = LocalPeer.peers.entrySet().stream().filter((entry) -> {
-                        return entry.getValue().isChoke() && entry.getValue().isInterstedInLocal();
-                    }).collect(Collectors.toList());
-                    Random random = new Random();
-                    optPeer = chokeList.get(random.nextInt(chokeList.size()));
+                    // choke并且对我感兴趣 在这些人里面选幸运儿
+                    chokeList = LocalPeer.peers.entrySet().stream().filter((entry) ->
+                        entry.getValue().isChoke() && entry.getValue().isInterstedInLocal()
+                    ).collect(Collectors.toList());
+                    optPeer = chokeList.get(new Random().nextInt(chokeList.size()));
                 } catch (Exception e) {
                     // 这里如果filiter为空就会出错 所以直接忽略这个错误
                     // 高危操作
                     return;
                 }
 
-                // 注意 因为在choke之中选的 所以一定不会选到原来那个，但是他可能会变成unchoke？
-                // 如果不在prefered里面可能变成choke
-                // 要考虑 optimisticUnchokingID
+                // 原本的幸运儿可能会成为choke 也可能继续是unchoke
+                // 注意 因为在choke之中选的 所以一定不会选到原来那个，但是他可能会在preferNeighbor中变成unchoke
+                // 要考虑 optimisticUnchokingID 如果不在prefered里面才变成choke
                 if (!preferedNeighbors.contains(optimisticUnchokingID) && optimisticUnchokingID != null) {
                     Client.getInstance().sendChokeMessage(optimisticUnchokingID);
                     try {
@@ -139,7 +124,7 @@ public class NeighborSelector extends Thread {
                     }
                 }
 
-                // 新来的一定会变成Unchoke 因为是在choke中选择的
+                // 新来的幸运儿一定会变成Unchoke 因为是在choke中选择的
                 LocalPeer.peers.get(optPeer.getKey()).setChoke(false);
                 // 改变optID
                 optimisticUnchokingID = optPeer.getKey();

@@ -1,7 +1,5 @@
 package file;
 
-import cfg.CommonCfg;
-
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -85,11 +83,9 @@ public class PieceFile {
     public static void spilt(String filePath, int maxPieceNum, double pieceSize, String id) {
         String currentDir = "./main/piece/id_" + id;
         File dir = new File(currentDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        if (!dir.exists())  dir.mkdirs();
         try {
-            nioSpilt(new File(filePath), maxPieceNum, currentDir, pieceSize);
+            nioSplit(new File(filePath), maxPieceNum, currentDir, pieceSize);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -104,24 +100,21 @@ public class PieceFile {
      * @param pieceSize 按多大分片
      * @throws Exception
      */
-    public static void nioSpilt(File file, int maxPieceNum, String currentDir, double pieceSize) throws Exception {
+    public static void nioSplit(File file, int maxPieceNum, String currentDir, double pieceSize) throws Exception {
         FileInputStream fis = new FileInputStream(file);
         FileChannel inputChannel = fis.getChannel();
         FileOutputStream fos;
         FileChannel outputChannel;
         long splitSize = (long) pieceSize;
         long startPoint = 0;
-        long endPoint = splitSize;
         File pieceDir = new File(currentDir);
-        if (!pieceDir.exists()) {
-            pieceDir.mkdir();
-        }
+        if (!pieceDir.exists()) pieceDir.mkdir();
+
         for (int i = 0; i < maxPieceNum; i++) {
             fos = new FileOutputStream(currentDir + File.separator + "piece_" + i);
             outputChannel = fos.getChannel();
             inputChannel.transferTo(startPoint, splitSize, outputChannel);
             startPoint += splitSize;
-            endPoint += splitSize;
             outputChannel.close();
             fos.close();
         }

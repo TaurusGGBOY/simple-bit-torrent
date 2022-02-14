@@ -18,7 +18,7 @@ public class FileTest {
         }
 
         try {
-            PieceFile.nioSpilt(file, CommonCfg.maxPieceNum, file.getParent() + File.separator + "piece", 32768);
+            PieceFile.nioSplit(file, CommonCfg.maxPieceNum, file.getParent() + File.separator + "piece", 32768);
         } catch (Exception e) {
             e.printStackTrace();
         }

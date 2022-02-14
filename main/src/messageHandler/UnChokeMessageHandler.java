@@ -24,17 +24,14 @@ public class UnChokeMessageHandler {
         List<Integer> list = new ArrayList<>();
         for (int piece : remotePeer.pieces) {
             // 保证等待队列没有才加入
-            if (!LocalPeer.localUser.pieces.contains(piece) && !LocalPeer.pieceWaitingMap.containsKey(piece)) {
-                list.add(piece);
-            }
+            if (!LocalPeer.localUser.pieces.contains(piece) && !LocalPeer.pieceWaitingMap.containsKey(piece)) list.add(piece);
         }
-        // 如果没有想要的就直接返回就好
-        if (list.size() <= 0) {
-            return;
-        }
+
+        // 如果没有想要的就直接返回就好、
+        if (list.size() <= 0) return;
+
         // 如果有就随机选择一片请求
-        int random = new Random().nextInt(list.size());
-        Client.getInstance().sendRequestMessage(msg.getFrom(), list.get(random));
+        Client.getInstance().sendRequestMessage(msg.getFrom(), list.get(new Random().nextInt(list.size())));
 
     }
 }
